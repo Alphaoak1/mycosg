@@ -1,0 +1,2025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MycoSG — Singapore's Mushroom Collective</title>
+
+<!-- SUPABASE SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase SDK loaded -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest: #1a2e1a; --moss: #2d4a2d; --sage: #4a7c59;
+  --cream: #f5f0e8; --parchment: #ede5d0;
+  --gold: #c9a84c; --gold-light: #e8c97a;
+  --spore: #8fbc6e; --rust: #c46b3a;
+  --text-dark: #1a1a14; --text-mid: #4a4a3a; --text-light: #7a7a6a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--forest);color:var(--cream);overflow-x:hidden;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.1rem 4rem;background:rgba(26,46,26,0.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(201,168,76,0.2);}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--gold);letter-spacing:.05em;}
+.nav-logo span{color:var(--spore);}
+.nav-links{display:flex;gap:2.2rem;list-style:none;}
+.nav-links a{font-size:.78rem;letter-spacing:.13em;text-transform:uppercase;color:var(--cream);text-decoration:none;opacity:.75;transition:all .2s;font-weight:500;}
+.nav-links a:hover{opacity:1;color:var(--gold);}
+.nav-cta{background:var(--gold);color:var(--forest);border:none;padding:.55rem 1.3rem;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s;}
+.nav-cta:hover{background:var(--gold-light);}
+
+/* TICKER */
+.ticker-bar{background:var(--gold);color:var(--forest);padding:.45rem 0;overflow:hidden;font-family:'DM Mono',monospace;font-size:.72rem;margin-top:66px;}
+.ticker-inner{display:flex;gap:4rem;white-space:nowrap;animation:ticker 32s linear infinite;}
+@keyframes ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.ticker-item{display:inline-flex;align-items:center;gap:.5rem;}
+.tdot{width:5px;height:5px;background:var(--forest);border-radius:50%;opacity:.4;}
+
+/* HERO */
+.hero{min-height:91vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:4rem;padding:5rem 4rem 4rem;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 68% 50%,rgba(143,188,110,.07) 0%,transparent 65%);pointer-events:none;}
+.eyebrow{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1.4rem;display:flex;align-items:center;gap:.8rem;}
+.eyebrow::before{content:'';width:28px;height:1px;background:var(--gold);}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(2.8rem,4.5vw,4.8rem);line-height:1.06;font-weight:700;color:var(--cream);margin-bottom:1.6rem;}
+.hero h1 em{color:var(--spore);font-style:italic;}
+.hero-desc{font-size:1rem;line-height:1.75;color:rgba(245,240,232,.68);max-width:460px;margin-bottom:2.2rem;}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;}
+.btn-primary{background:var(--gold);color:var(--forest);border:none;padding:.85rem 1.9rem;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.88rem;letter-spacing:.06em;cursor:pointer;border-radius:2px;transition:all .2s;text-decoration:none;display:inline-block;}
+.btn-primary:hover{background:var(--gold-light);transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--cream);border:1px solid rgba(245,240,232,.3);padding:.85rem 1.9rem;font-family:'DM Sans',sans-serif;font-size:.88rem;cursor:pointer;border-radius:2px;transition:all .2s;text-decoration:none;display:inline-block;}
+.btn-outline:hover{border-color:var(--cream);}
+.hero-visual{display:flex;flex-direction:column;align-items:flex-end;gap:1.5rem;}
+.mushroom-art{width:400px;height:400px;position:relative;display:flex;align-items:center;justify-content:center;}
+.mush-ring{position:absolute;border-radius:50%;border:1px solid rgba(201,168,76,.15);animation:pulse-ring 4s ease-in-out infinite;}
+.mush-ring:nth-child(1){width:400px;height:400px;animation-delay:0s;}
+.mush-ring:nth-child(2){width:280px;height:280px;animation-delay:.9s;}
+.mush-ring:nth-child(3){width:160px;height:160px;animation-delay:1.8s;}
+@keyframes pulse-ring{0%,100%{opacity:.25;transform:scale(1);}50%{opacity:.55;transform:scale(1.02);}}
+.mush-center{position:relative;z-index:2;font-size:8rem;animation:float 6s ease-in-out infinite;filter:drop-shadow(0 0 40px rgba(143,188,110,.28));}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-12px);}}
+.hero-stats{display:flex;gap:1.5rem;}
+.stat-box{text-align:center;padding:.9rem 1.3rem;border:1px solid rgba(201,168,76,.2);background:rgba(45,74,45,.4);border-radius:3px;}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--gold);display:block;}
+.stat-label{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,240,232,.45);display:block;margin-top:.2rem;}
+
+/* SECTIONS */
+section{padding:5.5rem 4rem;}
+.sec-label{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:.8rem;}
+.sec-label::before{content:'';width:28px;height:1px;background:var(--gold);}
+h2{font-family:'Playfair Display',serif;font-size:clamp(2rem,3.2vw,3rem);font-weight:700;line-height:1.1;color:var(--cream);margin-bottom:1.1rem;}
+h2 em{color:var(--spore);font-style:italic;}
+.sec-intro{font-size:.95rem;line-height:1.75;color:rgba(245,240,232,.62);max-width:540px;margin-bottom:2.8rem;}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.about-text p{font-size:.95rem;line-height:1.8;color:rgba(245,240,232,.68);margin-bottom:1.1rem;}
+.feat-list{display:flex;flex-direction:column;gap:1rem;margin-top:1.8rem;}
+.feat-item{display:flex;gap:1rem;align-items:flex-start;padding:1.1rem;border:1px solid rgba(201,168,76,.14);background:rgba(45,74,45,.28);border-radius:3px;transition:border-color .3s;}
+.feat-item:hover{border-color:rgba(201,168,76,.4);}
+.feat-icon{font-size:1.4rem;flex-shrink:0;width:36px;text-align:center;}
+.feat-title{font-weight:500;font-size:.88rem;color:var(--cream);margin-bottom:.25rem;}
+.feat-desc{font-size:.78rem;color:rgba(245,240,232,.5);line-height:1.5;}
+.variety-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.v-card{background:rgba(45,74,45,.45);border:1px solid rgba(143,188,110,.18);border-radius:3px;padding:1.4rem 1.1rem;text-align:center;transition:all .3s;cursor:default;}
+.v-card:hover{background:rgba(45,74,45,.75);border-color:var(--spore);transform:translateY(-3px);}
+.v-icon{font-size:2.2rem;display:block;margin-bottom:.7rem;}
+.v-name{font-family:'Playfair Display',serif;font-size:.92rem;font-weight:600;color:var(--cream);display:block;margin-bottom:.25rem;}
+.v-tag{font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--spore);display:block;}
+.v-card.wide{grid-column:span 2;display:flex;align-items:center;gap:1.4rem;text-align:left;}
+.v-card.wide .v-icon{font-size:2.8rem;flex-shrink:0;}
+.v-desc{font-size:.78rem;color:rgba(245,240,232,.5);line-height:1.5;margin-top:.25rem;}
+
+/* SUBSCRIPTION */
+.sub-bg{background:rgba(45,74,45,.15);}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-bottom:2.8rem;}
+.plan{border:1px solid rgba(201,168,76,.2);background:rgba(26,46,26,.6);border-radius:3px;padding:2rem;position:relative;transition:all .3s;}
+.plan.hot{border-color:var(--gold);background:rgba(45,74,45,.48);}
+.plan-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--forest);font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;padding:.28rem .9rem;border-radius:20px;font-weight:500;white-space:nowrap;}
+.plan-name{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;color:var(--cream);margin-bottom:.25rem;}
+.plan-tier{font-size:.7rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:1.4rem;}
+.plan-price{margin-bottom:1.4rem;padding-bottom:1.4rem;border-bottom:1px solid rgba(201,168,76,.12);}
+.plan-price .amt{font-family:'Playfair Display',serif;font-size:2.6rem;font-weight:700;color:var(--gold);}
+.plan-price .per{font-size:.78rem;color:rgba(245,240,232,.45);margin-left:.25rem;}
+.plan-weight{font-size:.78rem;color:var(--spore);display:block;margin-top:.25rem;}
+.plan-items{list-style:none;margin-bottom:1.8rem;}
+.plan-items li{font-size:.82rem;color:rgba(245,240,232,.68);padding:.45rem 0;border-bottom:1px solid rgba(201,168,76,.07);display:flex;align-items:center;gap:.55rem;}
+.plan-items li::before{content:'✓';color:var(--spore);font-size:.72rem;flex-shrink:0;}
+.plan-btn{width:100%;padding:.8rem;background:transparent;color:var(--gold);border:1px solid var(--gold);font-family:'DM Sans',sans-serif;font-weight:500;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;}
+.plan-btn:hover,.plan.hot .plan-btn{background:var(--gold);color:var(--forest);}
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);margin:2.5rem 0;}
+.flow-step{padding:1.8rem;border-right:1px solid rgba(201,168,76,.13);}
+.flow-step:last-child{border-right:none;}
+.step-num{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.2em;color:var(--gold);opacity:.55;margin-bottom:.9rem;display:block;}
+.step-icon{font-size:1.8rem;display:block;margin-bottom:.9rem;}
+.step-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--cream);margin-bottom:.4rem;}
+.step-desc{font-size:.78rem;color:rgba(245,240,232,.5);line-height:1.5;}
+
+/* WELLNESS */
+.w-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.4rem;}
+.w-card{border:1px solid rgba(143,188,110,.18);background:rgba(26,46,26,.75);border-radius:3px;padding:1.7rem 1.4rem;transition:all .3s;}
+.w-card:hover{border-color:var(--spore);background:rgba(45,74,45,.48);transform:translateY(-4px);}
+.w-icon{font-size:1.9rem;display:block;margin-bottom:.9rem;}
+.w-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--cream);margin-bottom:.25rem;}
+.w-strain{font-size:.67rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;display:block;}
+.w-desc{font-size:.78rem;color:rgba(245,240,232,.52);line-height:1.5;margin-bottom:.9rem;}
+.w-price{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--gold);}
+
+/* FARMBOX OWNERSHIP */
+.own-bg{background:rgba(10,20,10,.5);}
+.own-header{display:grid;grid-template-columns:1fr 1fr;gap:5rem;margin-bottom:4rem;align-items:start;}
+.econ-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.econ-card{padding:1.4rem;border:1px solid rgba(201,168,76,.2);background:rgba(45,74,45,.28);border-radius:3px;}
+.econ-label{font-size:.67rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(245,240,232,.48);display:block;margin-bottom:.45rem;}
+.econ-val{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--gold);}
+.econ-sub{font-size:.72rem;color:var(--spore);display:block;margin-top:.15rem;}
+
+/* LEGAL STRUCTURE CALLOUT */
+.legal-callout{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.28);border-radius:3px;padding:1.5rem 1.8rem;margin-bottom:2.5rem;}
+.legal-callout h4{font-family:'Playfair Display',serif;font-size:1rem;color:var(--gold);margin-bottom:.7rem;}
+.legal-callout p{font-size:.8rem;color:rgba(245,240,232,.65);line-height:1.65;}
+.legal-callout ul{margin:.5rem 0 0 1rem;}
+.legal-callout li{font-size:.78rem;color:rgba(245,240,232,.6);line-height:1.7;}
+
+/* ROI CALC */
+.roi-calc{background:rgba(45,74,45,.28);border:1px solid rgba(201,168,76,.2);border-radius:3px;padding:2.2rem;}
+.calc-title{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;color:var(--cream);margin-bottom:1.6rem;}
+.calc-row{margin-bottom:1.3rem;}
+.calc-label{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:rgba(245,240,232,.58);display:flex;justify-content:space-between;margin-bottom:.55rem;}
+.calc-label span{color:var(--gold);font-family:'DM Mono',monospace;}
+input[type=range]{width:100%;-webkit-appearance:none;height:3px;background:rgba(201,168,76,.28);outline:none;border-radius:2px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;background:var(--gold);border-radius:50%;cursor:pointer;}
+.scenario-tabs{display:flex;gap:.5rem;margin-bottom:1.5rem;}
+.s-tab{padding:.4rem .9rem;border:1px solid rgba(201,168,76,.25);background:transparent;color:rgba(245,240,232,.55);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;font-family:'DM Sans',sans-serif;}
+.s-tab.active{background:var(--gold);color:var(--forest);border-color:var(--gold);}
+.calc-results{margin-top:1.8rem;padding-top:1.4rem;border-top:1px solid rgba(201,168,76,.18);display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+.r-item{text-align:center;}
+.r-val{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:700;display:block;color:var(--gold);}
+.r-label{font-size:.67rem;letter-spacing:.08em;text-transform:uppercase;color:rgba(245,240,232,.45);margin-top:.15rem;display:block;}
+.timeline{margin-top:1.8rem;display:flex;flex-direction:column;gap:.7rem;}
+.t-bar-row{display:flex;align-items:center;gap:.9rem;}
+.t-label{font-size:.68rem;font-family:'DM Mono',monospace;color:rgba(245,240,232,.45);width:58px;flex-shrink:0;}
+.t-bar{height:5px;background:rgba(201,168,76,.18);border-radius:3px;flex:1;overflow:hidden;}
+.t-fill{height:100%;background:var(--gold);border-radius:3px;transition:width .6s ease;}
+.t-val{font-size:.68rem;font-family:'DM Mono',monospace;color:var(--spore);width:90px;text-align:right;flex-shrink:0;}
+
+/* OWNERSHIP TIERS */
+.own-tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;margin-top:2.5rem;}
+.own-card{border:1px solid rgba(201,168,76,.22);background:rgba(26,46,26,.68);border-radius:3px;padding:1.8rem;transition:all .3s;}
+.own-card:hover,.own-card.active{border-color:var(--gold);background:rgba(45,74,45,.48);}
+.oc-tier{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.15em;color:var(--gold);opacity:.7;text-transform:uppercase;margin-bottom:.7rem;}
+.oc-price{font-family:'Playfair Display',serif;font-size:2.1rem;font-weight:700;color:var(--cream);margin-bottom:.25rem;}
+.oc-units{font-size:.8rem;color:rgba(245,240,232,.55);margin-bottom:.25rem;}
+.oc-return{font-size:.82rem;color:var(--spore);margin-bottom:1.3rem;}
+.oc-divider{height:1px;background:rgba(201,168,76,.1);margin-bottom:1.3rem;}
+.oc-row{display:flex;justify-content:space-between;font-size:.78rem;padding:.3rem 0;color:rgba(245,240,232,.6);}
+.oc-row span:last-child{color:var(--cream);font-weight:500;}
+.oc-btn{width:100%;padding:.8rem;margin-top:1.4rem;background:transparent;color:var(--gold);border:1px solid rgba(201,168,76,.35);font-family:'DM Sans',sans-serif;font-weight:500;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all .2s;}
+.oc-btn:hover{background:var(--gold);color:var(--forest);}
+
+/* PROSPECTUS STRIP */
+.pros-strip{background:var(--gold);color:var(--forest);padding:1.8rem 4rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
+.pros-strip h3{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;}
+.pros-strip p{font-size:.82rem;opacity:.72;max-width:480px;}
+.btn-dark{background:var(--forest);color:var(--gold);border:none;padding:.8rem 1.8rem;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:background .2s;white-space:nowrap;}
+.btn-dark:hover{background:var(--moss);}
+
+/* EXPERIENCES */
+.exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;}
+.exp-card{border:1px solid rgba(143,188,110,.18);background:rgba(26,46,26,.58);border-radius:3px;overflow:hidden;transition:all .3s;}
+.exp-card:hover{border-color:var(--spore);transform:translateY(-4px);}
+.exp-header{padding:1.8rem;background:rgba(45,74,45,.38);font-size:2.3rem;text-align:center;}
+.exp-body{padding:1.4rem;}
+.exp-title{font-family:'Playfair Display',serif;font-size:1rem;font-weight:600;color:var(--cream);margin-bottom:.45rem;}
+.exp-desc{font-size:.78rem;color:rgba(245,240,232,.52);line-height:1.5;margin-bottom:.9rem;}
+.exp-meta{display:flex;justify-content:space-between;align-items:center;}
+.exp-price{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;color:var(--gold);}
+.exp-tag{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--forest);background:var(--spore);padding:.22rem .55rem;border-radius:20px;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(10,20,10,.92);backdrop-filter:blur(8px);align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--moss);border:1px solid rgba(201,168,76,.28);border-radius:3px;padding:2.2rem;width:min(560px,90vw);max-height:88vh;overflow-y:auto;position:relative;}
+.modal-close{position:absolute;top:.9rem;right:.9rem;background:none;border:none;color:var(--cream);font-size:1.1rem;cursor:pointer;opacity:.55;}
+.modal-close:hover{opacity:1;}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.45rem;font-weight:700;color:var(--cream);margin-bottom:.35rem;}
+.modal-sub{font-size:.72rem;color:var(--gold);margin-bottom:1.8rem;letter-spacing:.1em;text-transform:uppercase;}
+.m-step{display:none;}
+.m-step.active{display:block;}
+.form-group{margin-bottom:1.1rem;}
+.form-label{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(245,240,232,.58);display:block;margin-bottom:.45rem;}
+.form-input{width:100%;padding:.7rem .9rem;background:rgba(26,46,26,.6);border:1px solid rgba(201,168,76,.22);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.88rem;border-radius:2px;outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--gold);}
+.form-select{width:100%;padding:.7rem .9rem;background:rgba(26,46,26,.6);border:1px solid rgba(201,168,76,.22);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.88rem;border-radius:2px;outline:none;cursor:pointer;}
+.form-select option{background:var(--forest);}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+.opt-btn{padding:.7rem;border:1px solid rgba(201,168,76,.18);background:rgba(26,46,26,.38);color:rgba(245,240,232,.65);font-size:.8rem;cursor:pointer;border-radius:2px;transition:all .2s;text-align:center;font-family:'DM Sans',sans-serif;}
+.opt-btn.sel,.opt-btn:hover{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--cream);}
+.opt-btn-full{width:100%;padding:.75rem 1rem;border:1px solid rgba(201,168,76,.18);background:rgba(26,46,26,.38);color:rgba(245,240,232,.65);font-size:.8rem;cursor:pointer;border-radius:2px;transition:all .2s;text-align:left;font-family:'DM Sans',sans-serif;margin-bottom:.6rem;display:block;}
+.opt-btn-full.sel,.opt-btn-full:hover{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--cream);}
+.modal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:1.8rem;padding-top:1.4rem;border-top:1px solid rgba(201,168,76,.13);}
+.step-ind{font-family:'DM Mono',monospace;font-size:.67rem;color:rgba(245,240,232,.35);letter-spacing:.1em;}
+.success-msg{text-align:center;padding:1.8rem 0;}
+.success-msg .s-icon{font-size:2.8rem;display:block;margin-bottom:.9rem;}
+.success-msg h4{font-family:'Playfair Display',serif;font-size:1.35rem;color:var(--cream);margin-bottom:.45rem;}
+.success-msg p{font-size:.82rem;color:rgba(245,240,232,.58);line-height:1.6;}
+.info-box{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.2);border-radius:3px;padding:.9rem 1rem;font-size:.78rem;color:rgba(245,240,232,.65);line-height:1.6;margin:.9rem 0;}
+.warn-box{background:rgba(196,107,58,.08);border:1px solid rgba(196,107,58,.3);border-radius:3px;padding:.9rem 1rem;font-size:.78rem;color:rgba(245,240,232,.65);line-height:1.6;margin:.9rem 0;}
+
+/* PROSPECTUS DOC MODAL */
+.pros-modal{max-width:640px;}
+.pros-doc{font-size:.82rem;line-height:1.7;color:rgba(245,240,232,.72);}
+.pros-doc h4{font-family:'Playfair Display',serif;font-size:.98rem;color:var(--gold);margin:1.5rem 0 .6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(201,168,76,.18);}
+.pros-doc h4:first-child{margin-top:0;}
+.pros-row{display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid rgba(201,168,76,.06);font-size:.8rem;color:rgba(245,240,232,.65);}
+.pros-row span:last-child{color:var(--cream);font-weight:500;}
+.pros-total{display:flex;justify-content:space-between;padding:.45rem 0;margin-top:.3rem;font-weight:500;}
+.pros-total span:first-child{color:var(--cream);}
+.pros-total span:last-child{color:var(--gold);}
+.pros-highlight{background:rgba(201,168,76,.09);border:1px solid rgba(201,168,76,.25);border-radius:3px;padding:.9rem 1rem;margin:.9rem 0;font-size:.8rem;color:rgba(245,240,232,.78);line-height:1.65;}
+.pros-legal{font-size:.72rem;color:rgba(245,240,232,.38);line-height:1.6;margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(201,168,76,.1);}
+.scenario-table{width:100%;border-collapse:collapse;font-size:.78rem;margin:.8rem 0;}
+.scenario-table th{text-align:left;padding:.45rem .6rem;background:rgba(45,74,45,.5);color:var(--gold);font-weight:500;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;}
+.scenario-table td{padding:.4rem .6rem;border-bottom:1px solid rgba(201,168,76,.08);color:rgba(245,240,232,.68);}
+.scenario-table tr:last-child td{color:var(--cream);font-weight:500;}
+
+/* FOOTER */
+footer{background:rgba(8,14,8,.85);border-top:1px solid rgba(201,168,76,.12);padding:3.5rem 4rem 2rem;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:2.5rem;margin-bottom:2.5rem;}
+.fb-logo{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:700;color:var(--gold);margin-bottom:.9rem;}
+.footer-brand p{font-size:.78rem;color:rgba(245,240,232,.45);line-height:1.65;max-width:240px;}
+.footer-col h5{font-size:.67rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(245,240,232,.42);margin-bottom:.9rem;}
+.footer-col ul{list-style:none;}
+.footer-col li{font-size:.78rem;color:rgba(245,240,232,.52);padding:.28rem 0;cursor:pointer;transition:color .2s;}
+.footer-col li:hover{color:var(--cream);}
+.footer-bottom{padding-top:1.8rem;border-top:1px solid rgba(201,168,76,.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.footer-bottom p{font-size:.7rem;color:rgba(245,240,232,.3);}
+.footer-hsa{font-size:.65rem;color:rgba(245,240,232,.25);font-family:'DM Mono',monospace;}
+
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .65s ease,transform .65s ease;}
+.fade-in.visible{opacity:1;transform:translateY(0);}
+
+@media(max-width:900px){
+  nav{padding:1rem 1.5rem;}.nav-links{display:none;}
+  .hero{grid-template-columns:1fr;padding:4rem 1.5rem 3rem;}
+  .hero-visual{align-items:center;}.mushroom-art{width:260px;height:260px;}
+  .mush-ring:nth-child(1){width:260px;height:260px;}.mush-ring:nth-child(2){width:180px;height:180px;}.mush-ring:nth-child(3){width:110px;height:110px;}
+  section{padding:3.5rem 1.5rem;}
+  .about-grid,.own-header{grid-template-columns:1fr;gap:2rem;}
+  .plans-grid,.own-tiers,.w-grid,.exp-grid{grid-template-columns:1fr;}
+  .flow-steps{grid-template-columns:1fr 1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .pros-strip{flex-direction:column;}
+  .calc-results{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Myco<span>SG</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">Our Farm</a></li>
+    <li><a href="#subscribe">Mushroom Box</a></li>
+    <li><a href="#wellness">Wellness</a></li>
+    <li><a href="#own">Own a FarmBox</a></li>
+    <li><a href="#experiences">Experiences</a></li>
+  </ul>
+  <button class="nav-cta" onclick="openM('subscribe')">Subscribe Now</button>
+</nav>
+
+<!-- TICKER -->
+<div class="ticker-bar">
+  <div class="ticker-inner">
+    <span class="ticker-item"><span class="tdot"></span>Lion's Mane — Available Now</span>
+    <span class="ticker-item"><span class="tdot"></span>King Trumpet — Fresh Weekly</span>
+    <span class="ticker-item"><span class="tdot"></span>Pink Oyster — In Stock</span>
+    <span class="ticker-item"><span class="tdot"></span>FarmBox Unit 3 — Available for Purchase</span>
+    <span class="ticker-item"><span class="tdot"></span>Next Workshop — Apr 12</span>
+    <span class="ticker-item"><span class="tdot"></span>Cordyceps Tincture — New Batch</span>
+    <span class="ticker-item"><span class="tdot"></span>Chestnut — Fresh Harvest Tomorrow</span>
+    <span class="ticker-item"><span class="tdot"></span>Reishi Extract — Pre-order Open</span>
+    <span class="ticker-item"><span class="tdot"></span>Lion's Mane — Available Now</span>
+    <span class="ticker-item"><span class="tdot"></span>King Trumpet — Fresh Weekly</span>
+    <span class="ticker-item"><span class="tdot"></span>Pink Oyster — In Stock</span>
+    <span class="ticker-item"><span class="tdot"></span>FarmBox Unit 3 — Available for Purchase</span>
+    <span class="ticker-item"><span class="tdot"></span>Next Workshop — Apr 12</span>
+    <span class="ticker-item"><span class="tdot"></span>Cordyceps Tincture — New Batch</span>
+    <span class="ticker-item"><span class="tdot"></span>Chestnut — Fresh Harvest Tomorrow</span>
+    <span class="ticker-item"><span class="tdot"></span>Reishi Extract — Pre-order Open</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="fade-in">
+    <div class="eyebrow">Singapore's Modular Mushroom Collective</div>
+    <h1>Where <em>mycelium</em> meets the modern table</h1>
+    <p class="hero-desc">Container-grown gourmet and medicinal mushrooms, delivered fresh to your door. Farm-direct transparency, community ownership, and the science of fungi — built for Singapore.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="openM('subscribe')">Start Your Box</button>
+      <a href="#own" class="btn-outline">Own a FarmBox</a>
+    </div>
+  </div>
+  <div class="hero-visual fade-in">
+    <div class="mushroom-art">
+      <div class="mush-ring"></div><div class="mush-ring"></div><div class="mush-ring"></div>
+      <div class="mush-center">🍄</div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-box"><span class="stat-num">640kg</span><span class="stat-label">Monthly / Unit</span></div>
+      <div class="stat-box"><span class="stat-num">18+</span><span class="stat-label">Varieties Grown</span></div>
+      <div class="stat-box"><span class="stat-num">70%</span><span class="stat-label">Owner Revenue Share</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" style="background:rgba(45,74,45,.14);">
+  <div class="sec-label">Our Story</div>
+  <div class="about-grid">
+    <div class="about-text fade-in">
+      <h2>Not just a farm.<br>A <em>living system.</em></h2>
+      <p>MycoSG was born from a simple question: why is Singapore — a city obsessed with food innovation — still importing most of its gourmet mushrooms from overseas?</p>
+      <p>We built the answer: climate-controlled shipping containers turned into precision mushroom labs, placed strategically across the island. No pesticides, no airfreight, no compromise on freshness.</p>
+      <p>Our model draws on the Mushroom Street Farms playbook from Texas — adapted for Singapore's urban density, tropical climate, and health-conscious community.</p>
+      <div class="feat-list">
+        <div class="feat-item"><div class="feat-icon">📦</div><div><div class="feat-title">Modular FarmBox Units</div><div class="feat-desc">Each 40ft container produces up to 160kg/week of premium mushrooms in a fully biosecure, climate-controlled environment.</div></div></div>
+        <div class="feat-item"><div class="feat-icon">🧪</div><div><div class="feat-title">IoT-Monitored Growing</div><div class="feat-desc">Real-time sensors track CO₂, humidity, and temperature. Every harvest is predictable, traceable, and reported to unit owners monthly.</div></div></div>
+        <div class="feat-item"><div class="feat-icon">🌿</div><div><div class="feat-title">Zero-Waste Substrate</div><div class="feat-desc">We grow on spent coffee grounds, okara, and brewery grain — turning Singapore's food waste into premium nutrition.</div></div></div>
+      </div>
+    </div>
+    <div class="variety-grid fade-in">
+      <div class="v-card wide"><span class="v-icon">🦁</span><div><span class="v-name">Lion's Mane</span><span class="v-tag">Flagship Variety</span><div class="v-desc">Our hero mushroom. Prized for cognitive support and deep umami. Grown in dedicated containers at precise 16°C fruiting conditions.</div></div></div>
+      <div class="v-card"><span class="v-icon">👑</span><span class="v-name">King Trumpet</span><span class="v-tag">Chef's Choice</span></div>
+      <div class="v-card"><span class="v-icon">🌸</span><span class="v-name">Pink Oyster</span><span class="v-tag">Visual & Flavour</span></div>
+      <div class="v-card"><span class="v-icon">🌰</span><span class="v-name">Chestnut</span><span class="v-tag">High Volume</span></div>
+      <div class="v-card"><span class="v-icon">🔴</span><span class="v-name">Reishi</span><span class="v-tag">Medicinal</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBSCRIPTION -->
+<section id="subscribe" class="sub-bg">
+  <div class="sec-label">Mushroom Box</div>
+  <h2>The freshest fungi,<br><em>at your door.</em></h2>
+  <p class="sec-intro">Choose your level of mushroom obsession. Every box is packed within 24 hours of harvest, zero additives, customised to your preferences.</p>
+  <div class="flow-steps fade-in">
+    <div class="flow-step"><span class="step-num">01</span><span class="step-icon">🎯</span><div class="step-title">Choose Your Box</div><div class="step-desc">Three curated tiers based on your palate and wellness goals.</div></div>
+    <div class="flow-step"><span class="step-num">02</span><span class="step-icon">📅</span><div class="step-title">Set Frequency</div><div class="step-desc">Weekly or bi-weekly. Pause or skip anytime — no lock-in.</div></div>
+    <div class="flow-step"><span class="step-num">03</span><span class="step-icon">🚴</span><div class="step-title">We Harvest & Deliver</div><div class="step-desc">Same-day harvest to dispatch. Cold-chain delivery islandwide.</div></div>
+    <div class="flow-step"><span class="step-num">04</span><span class="step-icon">🍳</span><div class="step-title">Cook & Discover</div><div class="step-desc">Each box includes recipe cards and tasting notes from our team.</div></div>
+  </div>
+  <div class="plans-grid fade-in">
+    <div class="plan">
+      <div class="plan-name">The Forager</div><div class="plan-tier">Entry Level</div>
+      <div class="plan-price"><span class="amt">S$38</span><span class="per">/ delivery</span><span class="plan-weight">300g mixed mushrooms</span></div>
+      <ul class="plan-items"><li>2–3 mushroom varieties</li><li>Seasonal selection by farm</li><li>Digital recipe card</li><li>Cancel anytime</li></ul>
+      <button class="plan-btn" onclick="openM('subscribe')">Start Forager Box</button>
+    </div>
+    <div class="plan hot">
+      <div class="plan-badge">Most Popular</div>
+      <div class="plan-name">The Alchemist</div><div class="plan-tier">Full Experience</div>
+      <div class="plan-price"><span class="amt">S$68</span><span class="per">/ delivery</span><span class="plan-weight">600g + wellness add-on</span></div>
+      <ul class="plan-items"><li>4–5 gourmet varieties</li><li>Includes Lion's Mane or Reishi</li><li>1× wellness supplement sachet</li><li>Printed recipe booklet</li><li>Members-only workshop access</li></ul>
+      <button class="plan-btn" onclick="openM('subscribe')">Start Alchemist Box</button>
+    </div>
+    <div class="plan">
+      <div class="plan-name">The Mycophile</div><div class="plan-tier">Collector's Edition</div>
+      <div class="plan-price"><span class="amt">S$98</span><span class="per">/ delivery</span><span class="plan-weight">900g + tincture + grow kit</span></div>
+      <ul class="plan-items"><li>Full variety selection (6–7 types)</li><li>Monthly tincture rotation</li><li>Quarterly home grow kit</li><li>Priority harvest allocation</li><li>1× free workshop per quarter</li><li>FarmBox owner update access</li></ul>
+      <button class="plan-btn" onclick="openM('subscribe')">Start Mycophile Box</button>
+    </div>
+  </div>
+</section>
+
+<!-- WELLNESS -->
+<section id="wellness">
+  <div class="sec-label">Functional Wellness</div>
+  <h2>The pharmacy of the<br><em>forest floor.</em></h2>
+  <p class="sec-intro">Backed by traditional Chinese medicine and modern neuroscience. Dual-extracted in-house for maximum bioavailability. All products comply with HSA supplement guidelines.</p>
+  <p style="font-size:.7rem;color:rgba(245,240,232,.3);margin-bottom:2.2rem;font-family:'DM Mono',monospace;">⚠ Health claims are educational only and do not constitute medical advice. Consult a qualified healthcare professional before use.</p>
+  <div class="w-grid fade-in">
+    <div class="w-card"><span class="w-icon">🧠</span><div class="w-name">Focus & Cognition</div><span class="w-strain">Lion's Mane Extract</span><div class="w-desc">Supports nerve growth factor (NGF). Used for memory, clarity, and neuroplasticity. 30ml dual-extract tincture.</div><div class="w-price">S$38</div></div>
+    <div class="w-card"><span class="w-icon">🛡️</span><div class="w-name">Immunity Shield</div><span class="w-strain">Turkey Tail + Reishi</span><div class="w-desc">Beta-glucan rich formula for immune modulation. Trusted in TCM for centuries. Capsule or liquid format.</div><div class="w-price">S$42</div></div>
+    <div class="w-card"><span class="w-icon">⚡</span><div class="w-name">Energy & Endurance</div><span class="w-strain">Cordyceps Militaris</span><div class="w-desc">Increases ATP production and oxygen utilisation. Sustained energy without stimulants. Preferred by athletes.</div><div class="w-price">S$45</div></div>
+    <div class="w-card"><span class="w-icon">🌙</span><div class="w-name">Sleep & Calm</div><span class="w-strain">Reishi Extract</span><div class="w-desc">Adaptogenic properties supporting the nervous system and restorative sleep. The "mushroom of immortality" in TCM tradition.</div><div class="w-price">S$38</div></div>
+  </div>
+</section>
+
+<!-- FARMBOX OWNERSHIP -->
+<section id="own" class="own-bg">
+  <div class="sec-label">FarmBox Ownership</div>
+  <div class="own-header">
+    <div class="fade-in">
+      <h2>Purchase a FarmBox.<br><em>Own your harvest.</em></h2>
+      <p style="font-size:.95rem;line-height:1.75;color:rgba(245,240,232,.62);margin-bottom:1.5rem;">You purchase a fully-equipped, production-ready FarmBox unit. Title transfers to you. MycoSG operates it under a separate Farm Management Services Agreement and pays you a variable service fee based on output — 70% of net monthly production revenue.</p>
+
+      <div class="legal-callout">
+        <h4>How This Works — Legally</h4>
+        <p>This is a two-contract structure, not a financial product:</p>
+        <ul>
+          <li><strong style="color:var(--cream);">Contract 1 — Equipment Sale Agreement:</strong> You purchase a FarmBox unit. Title, depreciation, and asset rights belong to you. You may resell the unit.</li>
+          <li><strong style="color:var(--cream);">Contract 2 — Farm Management Services Agreement:</strong> MycoSG manages your unit and pays you a variable service fee tied to monthly output. MycoSG bears all operating costs from its 30% share.</li>
+          <li><strong style="color:var(--cream);">Small Offers Exemption:</strong> Offered to a maximum of 50 persons within any 12-month period, with total consideration not exceeding S$5 million, in compliance with Section 272A of the Securities and Futures Act.</li>
+        </ul>
+      </div>
+
+      <div class="econ-grid">
+        <div class="econ-card"><span class="econ-label">FarmBox Purchase Price</span><span class="econ-val">S$58,000</span><span class="econ-sub">Full title transfer to buyer</span></div>
+        <div class="econ-card"><span class="econ-label">Monthly Net Output Revenue</span><span class="econ-val">S$5,000</span><span class="econ-sub">Base case estimate</span></div>
+        <div class="econ-card"><span class="econ-label">Your Variable Fee (70%)</span><span class="econ-val">S$3,500</span><span class="econ-sub">Paid monthly by MycoSG</span></div>
+        <div class="econ-card"><span class="econ-label">MycoSG Mgmt Fee (30%)</span><span class="econ-val">S$1,500</span><span class="econ-sub">Covers all OPEX + operations</span></div>
+      </div>
+    </div>
+
+    <div class="roi-calc fade-in">
+      <div class="calc-title">Output Fee Calculator</div>
+      <div class="scenario-tabs">
+        <button class="s-tab" onclick="setScenario('conservative',this)">Conservative</button>
+        <button class="s-tab active" onclick="setScenario('base',this)">Base Case</button>
+        <button class="s-tab" onclick="setScenario('optimistic',this)">Optimistic</button>
+      </div>
+      <div class="calc-row">
+        <div class="calc-label">Number of FarmBox Units <span id="unit-disp">1</span></div>
+        <input type="range" min="1" max="5" value="1" step="1" id="unit-slider" oninput="calcROI()">
+      </div>
+      <div class="calc-results">
+        <div class="r-item"><span class="r-val" id="r-invest">S$58K</span><span class="r-label">Total Purchase</span></div>
+        <div class="r-item"><span class="r-val" id="r-monthly">S$3,500</span><span class="r-label">Monthly Fee</span></div>
+        <div class="r-item"><span class="r-val" id="r-breakeven">~17 mo</span><span class="r-label">Breakeven</span></div>
+      </div>
+      <div class="timeline">
+        <div class="t-bar-row"><span class="t-label">6 months</span><div class="t-bar"><div class="t-fill" id="tf6" style="width:35%"></div></div><span class="t-val" id="tv6">S$21,000</span></div>
+        <div class="t-bar-row"><span class="t-label">Breakeven</span><div class="t-bar"><div class="t-fill" id="tfb" style="width:100%"></div></div><span class="t-val" id="tvb">~14 mo</span></div>
+        <div class="t-bar-row"><span class="t-label">Year 3</span><div class="t-bar"><div class="t-fill" style="width:100%"></div></div><span class="t-val" id="tv36">S$126,000</span></div>
+      </div>
+      <div class="warn-box" style="margin-top:1.2rem;">⚠ Projections are estimates based on modelled scenarios. Actual output fees depend on harvest yields, market pricing, and operating conditions. See full risk disclosure in the Information Memorandum.</div>
+      <button class="btn-primary" style="width:100%;margin-top:1.2rem;" onclick="openM('own')">Express Interest →</button>
+    </div>
+  </div>
+
+  <div class="own-tiers fade-in">
+    <div class="own-card">
+      <div class="oc-tier">Tier 1 — Single Unit</div>
+      <div class="oc-price">S$58,000</div>
+      <div class="oc-units">1 FarmBox Unit</div>
+      <div class="oc-return">S$1,750–5,600 / month variable fee</div>
+      <div class="oc-divider"></div>
+      <div class="oc-row"><span>Conservative breakeven</span><span>~33 months</span></div>
+      <div class="oc-row"><span>Base case breakeven</span><span>~17 months</span></div>
+      <div class="oc-row"><span>Optimistic breakeven</span><span>~10 months</span></div>
+      <div class="oc-row"><span>Year 3 cumulative (base)</span><span>S$126,000</span></div>
+      <div class="oc-row"><span>3yr return (base)</span><span>2.52×</span></div>
+      <button class="oc-btn" onclick="openM('own')">Express Interest</button>
+    </div>
+    <div class="own-card active">
+      <div class="oc-tier">Tier 2 — Multi-Unit</div>
+      <div class="oc-price">S$116–174K</div>
+      <div class="oc-units">2–3 FarmBox Units</div>
+      <div class="oc-return">S$3,500–10,500 / month variable fee</div>
+      <div class="oc-divider"></div>
+      <div class="oc-row"><span>Conservative breakeven</span><span>~33 months</span></div>
+      <div class="oc-row"><span>Base case breakeven</span><span>~17 months</span></div>
+      <div class="oc-row"><span>Optimistic breakeven</span><span>~10 months</span></div>
+      <div class="oc-row"><span>Year 3 cumulative (base)</span><span>S$252–378K</span></div>
+      <div class="oc-row"><span>Bonus</span><span>Quarterly farm visits</span></div>
+      <button class="oc-btn" onclick="openM('own')">Express Interest</button>
+    </div>
+    <div class="own-card">
+      <div class="oc-tier">Tier 3 — Anchor Owner</div>
+      <div class="oc-price">S$232–290K</div>
+      <div class="oc-units">4–5 FarmBox Units</div>
+      <div class="oc-return">S$7,000–17,500 / month variable fee</div>
+      <div class="oc-divider"></div>
+      <div class="oc-row"><span>Conservative breakeven</span><span>~33 months</span></div>
+      <div class="oc-row"><span>Base case breakeven</span><span>~17 months</span></div>
+      <div class="oc-row"><span>Optimistic breakeven</span><span>~10 months</span></div>
+      <div class="oc-row"><span>Year 3 cumulative (base)</span><span>S$504–630K</span></div>
+      <div class="oc-row"><span>Bonus</span><span>Co-branding + advisory</span></div>
+      <button class="oc-btn" onclick="openM('own')">Express Interest</button>
+    </div>
+  </div>
+</section>
+
+<!-- PROSPECTUS STRIP -->
+<div class="pros-strip">
+  <div>
+    <h3>Download the Information Memorandum</h3>
+    <p>Full cost breakdown, Farm Management Services Agreement terms, three-scenario financial model, risk disclosures, and SFA Small Offers compliance documentation.</p>
+  </div>
+  <button class="btn-dark" onclick="openM('lead-capture')">View Information Memorandum →</button>
+</div>
+
+<!-- EXPERIENCES -->
+<section id="experiences">
+  <div class="sec-label">Community & Education</div>
+  <h2>Learn. Grow.<br><em>Eat well.</em></h2>
+  <p class="sec-intro">From hands-on cultivation workshops to chef-led cooking classes, we run Singapore's most engaging fungi education programme — open to subscribers, FarmBox owners, and the public.</p>
+  <div class="exp-grid fade-in">
+    <div class="exp-card">
+      <div class="exp-header">🌱</div>
+      <div class="exp-body"><div class="exp-title">Beginner Cultivation Workshop</div><div class="exp-desc">Substrate preparation, inoculation, and fruiting conditions. Take home your own grow kit to start your first flush.</div><div class="exp-meta"><span class="exp-price">S$85 / pax</span><span class="exp-tag">3 Hours</span></div></div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-header">🏭</div>
+      <div class="exp-body"><div class="exp-title">FarmBox Container Tour</div><div class="exp-desc">Behind-the-scenes access to our modular growing units. Ideal for schools, corporate teams, and curious foodies. Includes tasting.</div><div class="exp-meta"><span class="exp-price">S$35 / pax</span><span class="exp-tag">90 Min</span></div></div>
+    </div>
+    <div class="exp-card">
+      <div class="exp-header">👨‍🍳</div>
+      <div class="exp-body"><div class="exp-title">Mushroom Cooking Masterclass</div><div class="exp-desc">Chef-led class exploring gourmet mushroom preparations — from umami broths to truffle-adjacent mains. Includes recipe book.</div><div class="exp-meta"><span class="exp-price">S$120 / pax</span><span class="exp-tag">2.5 Hours</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><div class="fb-logo">MycoSG</div><p>Singapore's first modular mushroom collective. Farm-to-door gourmet fungi, functional wellness, and community ownership — rooted in the science of mycelium.</p></div>
+    <div class="footer-col"><h5>Products</h5><ul>
+      <li onclick="openM('subscribe')">Mushroom Box</li>
+      <li onclick="openM('fresh-varieties')">Fresh Varieties</li>
+      <li onclick="openM('wellness-detail')">Tinctures</li>
+      <li onclick="openM('wellness-detail')">Capsules &amp; Powders</li>
+      <li onclick="openM('grow-kits')">Grow Kits</li>
+    </ul></div>
+    <div class="footer-col"><h5>FarmBox</h5><ul>
+      <li onclick="openM('how-it-works')">How It Works</li>
+      <li onclick="document.getElementById('unit-slider').scrollIntoView({behavior:'smooth'});closeAllM()">Output Fee Calculator</li>
+      <li onclick="openM('lead-capture')">Information Memorandum</li>
+      <li onclick="openM('owner-dashboard')">Owner Dashboard</li>
+      <li onclick="openM('faq')">FAQ</li>
+    </ul></div>
+    <div class="footer-col"><h5>Community</h5><ul>
+      <li onclick="openM('workshops')">Workshops</li>
+      <li onclick="openM('farm-tours')">Farm Tours</li>
+      <li onclick="openM('cooking-classes')">Cooking Classes</li>
+      <li onclick="openM('corporate-events')">Corporate Events</li>
+      <li onclick="openM('schools-programme')">Schools Programme</li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 MycoSG Pte. Ltd. All rights reserved. Singapore UEN: 202512345A</p>
+    <div class="footer-hsa">HSA Supplement Compliance | SFA Licensed Farm | Small Offers Exemption s.272A SFA | This is not a public offer of securities.</div>
+  </div>
+</footer>
+
+<!-- SUBSCRIBE MODAL -->
+<div class="modal-overlay" id="modal-subscribe">
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('subscribe')">✕</button>
+    <h3>Start Your Mushroom Box</h3><div class="modal-sub">Fresh from our FarmBox to your door</div>
+    <div class="m-step active" id="sub-1">
+      <div class="form-group"><label class="form-label">Choose your plan</label>
+        <button class="opt-btn-full" onclick="selOpt(this,'plan')">🌿 The Forager — S$38 &nbsp; (300g, 2–3 varieties)</button>
+        <button class="opt-btn-full sel" onclick="selOpt(this,'plan')">🧪 The Alchemist — S$68 &nbsp; (600g + wellness sachet)</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'plan')">🍄 The Mycophile — S$98 &nbsp; (900g + tincture + grow kit)</button>
+      </div>
+      <div class="form-group"><label class="form-label">Delivery Frequency</label>
+        <div class="opt-grid"><button class="opt-btn sel" onclick="selOpt(this,'freq')">Weekly</button><button class="opt-btn" onclick="selOpt(this,'freq')">Bi-Weekly</button></div>
+      </div>
+      <div class="modal-footer"><span class="step-ind">STEP 1 / 3</span><button class="btn-primary" onclick="nextStep('sub',2)">Continue →</button></div>
+    </div>
+    <div class="m-step" id="sub-2">
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="sub-name" placeholder="Your full name"></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="sub-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Delivery Postcode</label><input type="text" class="form-input" id="sub-postcode" placeholder="e.g. 238841"></div>
+      <div class="form-group"><label class="form-label">Preferences (optional)</label>
+        <div class="opt-grid"><button class="opt-btn" onclick="this.classList.toggle('sel')">No spicy varieties</button><button class="opt-btn" onclick="this.classList.toggle('sel')">Include Lion's Mane</button><button class="opt-btn" onclick="this.classList.toggle('sel')">Avoid Reishi</button><button class="opt-btn" onclick="this.classList.toggle('sel')">Chef's surprise</button></div>
+      </div>
+      <div class="modal-footer"><button class="btn-outline" onclick="nextStep('sub',1)">← Back</button><span class="step-ind">STEP 2 / 3</span><button class="btn-primary" onclick="nextStep('sub',3)">Continue →</button></div>
+    </div>
+    <div class="m-step" id="sub-3">
+      <div class="form-group"><label class="form-label">Payment Method</label>
+        <select class="form-select" id="sub-payment"><option>PayNow / PayLah</option><option>Credit / Debit Card</option><option>GrabPay</option><option>GIRO (Monthly)</option></select>
+      </div>
+      <div class="error-box" id="sub-error"></div>
+      <div class="info-box">Your first box will be dispatched within 48 hours of confirmation. You'll receive a harvest notification with real-time farm data before each delivery. Cancel anytime, no fees.</div>
+      <div class="modal-footer"><button class="btn-outline" onclick="nextStep('sub',2)">← Back</button><span class="step-ind">STEP 3 / 3</span><button class="btn-primary" id="sub-submit" onclick="submitSubscription()">Confirm Subscription →</button></div>
+    </div>
+    <div class="m-step" id="sub-success"><div class="success-msg"><span class="s-icon">🍄</span><h4>Welcome to the collective!</h4><p>Your mushroom box is confirmed. Watch your inbox for a harvest notification — we'll tell you exactly which varieties are going into your first box and your expected delivery window.</p></div></div>
+  </div>
+</div>
+
+<!-- FARMBOX INTEREST MODAL -->
+<div class="modal-overlay" id="modal-own">
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('own')">✕</button>
+    <h3>FarmBox Purchase — Expression of Interest</h3><div class="modal-sub">Equipment Sale + Farm Management Services Agreement</div>
+    <div class="m-step active" id="own-1">
+      <div class="info-box"><strong style="color:var(--gold);">Structure reminder:</strong> You are purchasing a physical FarmBox unit (title transfers to you). A separate Farm Management Services Agreement governs MycoSG's operation of the unit and your variable output fee. This is not an investment product.</div>
+      <div class="form-group"><label class="form-label">Number of FarmBox units</label>
+        <button class="opt-btn-full sel" onclick="selOpt(this,'units')">1 Unit — S$58,000</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'units')">2 Units — S$116,000</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'units')">3 Units — S$174,000</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'units')">4–5 Units — S$232,000–290,000</button>
+      </div>
+      <div class="modal-footer"><span class="step-ind">STEP 1 / 3</span><button class="btn-primary" onclick="nextStep('own',2)">Continue →</button></div>
+    </div>
+    <div class="m-step" id="own-2">
+      <div class="form-group"><label class="form-label">Full Legal Name</label><input type="text" class="form-input" id="own-fullname" placeholder="As per NRIC / Passport / ACRA"></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="own-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Contact Number</label><input type="tel" class="form-input" id="own-phone" placeholder="+65 9XXX XXXX"></div>
+      <div class="form-group"><label class="form-label">Purchaser Type</label>
+        <select class="form-select" id="own-ptype"><option>Individual</option><option>Family Office</option><option>Private Company (Pte. Ltd.)</option><option>Other Corporate</option></select>
+      </div>
+      <div class="modal-footer"><button class="btn-outline" onclick="nextStep('own',1)">← Back</button><span class="step-ind">STEP 2 / 3</span><button class="btn-primary" onclick="nextStep('own',3)">Continue →</button></div>
+    </div>
+    <div class="m-step" id="own-3">
+      <div class="error-box" id="own-error"></div>
+      <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;">
+        <button class="btn-outline" style="font-size:.72rem;padding:.4rem .9rem;" onclick="openM('esa')">Equipment Sale Agreement</button>
+        <button class="btn-outline" style="font-size:.72rem;padding:.4rem .9rem;" onclick="openM('fmsa')">Farm Management Agreement</button>
+        <button class="btn-outline" style="font-size:.72rem;padding:.4rem .9rem;border-color:var(--rust);color:var(--rust);" onclick="openM('rds')">Risk Disclosure</button>
+      </div>
+      <div class="warn-box"><strong style="color:var(--rust);">Risk Disclosure:</strong> Equipment ownership in agricultural operations involves operational, market, regulatory, and asset risk. Output fees are variable and not guaranteed. The FarmBox unit may depreciate in value. MycoSG bears operating costs but does not guarantee yield targets. Please read the full Information Memorandum before proceeding.</div>
+      <div class="form-group">
+        <button class="opt-btn-full sel" onclick="this.classList.toggle('sel')">✓ I have read and understood the risk disclosures in the Information Memorandum</button>
+        <button class="opt-btn-full" onclick="this.classList.toggle('sel')">I confirm this expression of interest is non-binding pending review of full documentation</button>
+        <button class="opt-btn-full" onclick="this.classList.toggle('sel')">I understand this is an equipment purchase, not a regulated financial product</button>
+      </div>
+      <div class="modal-footer"><button class="btn-outline" onclick="nextStep('own',2)">← Back</button><span class="step-ind">STEP 3 / 3</span><button class="btn-primary" id="own-submit" onclick="submitFarmboxInterest()">Submit Expression of Interest →</button></div>
+    </div>
+    <div class="m-step" id="own-success"><div class="success-msg"><span class="s-icon">📦</span><h4>Expression of interest received.</h4><p>Our team will contact you within 2 business days to share the full Information Memorandum, Equipment Sale Agreement, and Farm Management Services Agreement for your legal review. No commitment is made until documents are signed.</p></div></div>
+  </div>
+</div>
+
+
+<!-- LEAD CAPTURE — gates IM access, stores to Supabase -->
+<div class="modal-overlay" id="modal-lead-capture">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeM('lead-capture')">✕</button>
+    <div class="m-step active" id="lc-1">
+      <div class="lead-brand">
+        <span class="lb-icon">📄</span>
+        <h3>Information Memorandum</h3>
+        <div class="modal-sub">MycoSG FarmBox Programme — 2025</div>
+        <p>Enter your details below to access the full Information Memorandum including unit economics, three-scenario financial model, and SFA compliance documentation.</p>
+      </div>
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" class="form-input" id="lc-name" placeholder="Your full name"></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="lc-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Contact Number</label><input type="tel" class="form-input" id="lc-phone" placeholder="+65 9XXX XXXX"></div>
+      <div class="form-group"><label class="form-label">I am a</label>
+        <select class="form-select" id="lc-type">
+          <option value="individual">Individual Purchaser</option>
+          <option value="family_office">Family Office</option>
+          <option value="corporate">Corporate / Company</option>
+          <option value="advisor">Financial Advisor / IFA</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <button class="opt-btn-full sel" id="lc-consent" onclick="this.classList.toggle('sel')" style="text-align:left;">✓ I consent to MycoSG contacting me about the FarmBox programme and agree to the privacy policy</button>
+      </div>
+      <div class="error-box" id="lc-error">Please complete all required fields.</div>
+      <button class="btn-primary" style="width:100%;" id="lc-submit" onclick="submitLeadCapture()">Access Information Memorandum →</button>
+      <p class="privacy-note">Your details are stored securely and used only for FarmBox programme information. We do not sell or share your data.</p>
+    </div>
+    <div class="m-step" id="lc-success">
+      <div class="success-msg">
+        <span class="s-icon">📄</span>
+        <h4>Access granted.</h4>
+        <p>Thank you. The Information Memorandum is now unlocked. Our team will follow up within 2 business days.</p>
+      </div>
+      <button class="btn-primary" style="width:100%;margin-top:1.5rem;" onclick="closeM('lead-capture');openM('prospectus')">Open Information Memorandum →</button>
+    </div>
+  </div>
+</div>
+
+<!-- INFORMATION MEMORANDUM MODAL -->
+<div class="modal-overlay" id="modal-prospectus">
+  <div class="modal pros-modal">
+    <button class="modal-close" onclick="closeM('prospectus')">✕</button>
+    <h3>Information Memorandum</h3><div class="modal-sub">MycoSG FarmBox Programme — 2025 Edition</div>
+    <div class="m-step active" id="pros-1">
+      <div class="pros-doc">
+
+        <h4>1. Structure Overview</h4>
+        <p>The MycoSG FarmBox Programme is structured as a two-contract commercial arrangement. It is not a collective investment scheme, managed fund, or financial product regulated under the Securities and Futures Act (SFA).</p>
+        <div class="pros-highlight">
+          <strong style="color:var(--gold);">Contract 1 — Equipment Sale Agreement:</strong> The purchaser acquires full legal title to one or more FarmBox units (modified 40-foot shipping containers, fully fitted for mushroom cultivation). Title transfers upon receipt of full payment. The unit is registered on the purchaser's balance sheet and may be resold, transferred, or repurposed subject to MycoSG's right of first refusal.<br><br>
+          <strong style="color:var(--gold);">Contract 2 — Farm Management Services Agreement (FMSA):</strong> MycoSG provides full farm management services including substrate preparation, cultivation, harvesting, sales, and distribution. MycoSG retains 30% of monthly net production revenue as its management fee and bears all operating expenses therefrom. The remaining 70% is paid to the unit owner as a variable output service fee within 15 days of month-end.
+        </div>
+
+        <h4>2. FarmBox Purchase Price — Cost Breakdown</h4>
+        <div class="pros-row"><span>40ft container (used, certified)</span><span>S$8,000</span></div>
+        <div class="pros-row"><span>Insulation + tropical modification</span><span>S$6,000</span></div>
+        <div class="pros-row"><span>HVAC system (commercial grade)</span><span>S$9,000</span></div>
+        <div class="pros-row"><span>Shelving, LED grow lights, IoT sensors</span><span>S$5,000</span></div>
+        <div class="pros-row"><span>Sterilisation + inoculation lab fit-out</span><span>S$7,000</span></div>
+        <div class="pros-row"><span>Electrical works, NEA compliance</span><span>S$4,000</span></div>
+        <div class="pros-row"><span>SFA licensing, regulatory compliance</span><span>S$3,000</span></div>
+        <div class="pros-row"><span>MycoSG commissioning + setup fee</span><span>S$8,000</span></div>
+        <div class="pros-total"><span>Total Purchase Price (per unit)</span><span>S$58,000</span></div>
+
+        <h4>3. Output Fee — Three-Scenario Model</h4>
+        <p style="margin-bottom:.7rem;">The variable output fee paid to the unit owner is 70% of monthly net production revenue, after MycoSG deducts operating costs from its 30% management fee. The purchaser bears no operating expenses.</p>
+        <table class="scenario-table">
+          <tr><th>Scenario</th><th>Net Revenue/mo</th><th>Owner Fee (70%)</th><th>Breakeven</th><th>Year 3 Return</th></tr>
+          <tr><td>Conservative</td><td>S$2,500</td><td>S$1,750</td><td>~29 months</td><td>S$63,000</td></tr>
+          <tr><td>Base Case</td><td>S$5,000</td><td>S$3,500</td><td>~14 months</td><td>S$126,000</td></tr>
+          <tr><td>Optimistic</td><td>S$8,000</td><td>S$5,600</td><td>~9 months</td><td>S$201,600</td></tr>
+        </table>
+
+        <h4>4. MycoSG Monthly OPEX (Borne by MycoSG from 30% Fee)</h4>
+        <div class="pros-row"><span>Electricity (HVAC 24/7, S$0.25/kWh)</span><span>S$1,200–1,800</span></div>
+        <div class="pros-row"><span>Substrate (coffee grounds, okara, grain)</span><span>S$400–700</span></div>
+        <div class="pros-row"><span>Labour (shared operator, pro-rated)</span><span>S$1,500–2,200</span></div>
+        <div class="pros-row"><span>HVAC maintenance + servicing</span><span>S$300–500</span></div>
+        <div class="pros-row"><span>Packaging + cold chain logistics</span><span>S$400–700</span></div>
+        <div class="pros-row"><span>Insurance, compliance, miscellaneous</span><span>S$200–300</span></div>
+        <div class="pros-total"><span>Total Estimated OPEX</span><span>S$4,000–6,200 / month</span></div>
+
+        <h4>5. Regulatory Compliance</h4>
+        <div class="pros-highlight">
+          This programme is offered under the <strong style="color:var(--cream);">Small Offers Exemption</strong> pursuant to Section 272A of the Securities and Futures Act (Cap. 289). Offers are limited to a maximum of 50 persons within any 12-month period, with aggregate consideration not exceeding S$5,000,000. This document is not a prospectus registered with the Monetary Authority of Singapore. Purchasers are encouraged to seek independent legal and financial advice before proceeding.
+        </div>
+
+        <h4>6. Key Risk Factors</h4>
+        <p><strong style="color:var(--cream);">Yield risk:</strong> Actual mushroom production may fall below projections due to contamination, environmental factors, or substrate availability. A single contamination event may eliminate 2–4 weeks of production.<br><br>
+        <strong style="color:var(--cream);">Market price risk:</strong> Wholesale and retail mushroom prices may decline if supply increases or demand softens.<br><br>
+        <strong style="color:var(--cream);">Operational risk:</strong> HVAC failure, power disruption, or labour shortage may temporarily halt production. MycoSG maintains maintenance reserves but cannot guarantee uninterrupted operation.<br><br>
+        <strong style="color:var(--cream);">Asset value risk:</strong> The FarmBox unit is a physical asset that depreciates over its useful life (estimated 8–10 years). Resale value is not guaranteed.<br><br>
+        <strong style="color:var(--cream);">Regulatory risk:</strong> Changes to SFA, HSA, or MAS regulations may affect programme structure or product sales.</p>
+
+        <div class="pros-legal">
+          This Information Memorandum is issued by MycoSG Pte. Ltd. (UEN: 202512345A), incorporated in Singapore. It is intended solely for the named recipient and may not be redistributed. This document does not constitute an offer or solicitation in any jurisdiction where such offer would be unlawful. Past projections and scenario modelling do not guarantee future output fees. Purchasers are advised to obtain independent legal and financial advice prior to entering into any agreement.
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:1.5rem;">
+        <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;">
+          <button class="btn-outline" style="font-size:.72rem;padding:.45rem .9rem;" onclick="closeM('prospectus');openM('esa')">Equipment Sale Agreement</button>
+          <button class="btn-outline" style="font-size:.72rem;padding:.45rem .9rem;" onclick="closeM('prospectus');openM('fmsa')">Farm Management Agreement</button>
+          <button class="btn-outline" style="font-size:.72rem;padding:.45rem .9rem;border-color:var(--rust);color:var(--rust);" onclick="closeM('prospectus');openM('rds')">Risk Disclosure</button>
+        </div>
+        <button class="btn-primary" onclick="closeM('prospectus');openM('own')">Proceed to Expression of Interest →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// SCROLL
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');}),{threshold:.1});
+document.querySelectorAll('.fade-in').forEach(el=>obs.observe(el));
+
+// SCENARIO DATA
+const scenarios={
+  conservative:{net:2500,owner:1750,breakeven:33},
+  base:{net:5000,owner:3500,breakeven:17},
+  optimistic:{net:8000,owner:5600,breakeven:10}
+};
+let currentScenario='base';
+
+function setScenario(s,btn){
+  currentScenario=s;
+  document.querySelectorAll('.s-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  calcROI();
+}
+
+function calcROI(){
+  const u=parseInt(document.getElementById('unit-slider').value);
+  document.getElementById('unit-disp').textContent=u;
+  const sc=scenarios[currentScenario];
+  const totalPurchase=u*58000;
+  const monthlyFee=u*sc.owner;
+  const breakeven=sc.breakeven;
+  const yr3=monthlyFee*36;
+
+  document.getElementById('r-invest').textContent='S$'+(totalPurchase/1000).toFixed(0)+'K';
+  document.getElementById('r-monthly').textContent='S$'+monthlyFee.toLocaleString();
+  document.getElementById('r-breakeven').textContent='~'+breakeven+' mo';
+
+  const m6=monthlyFee*6;
+  document.getElementById('tv6').textContent='S$'+m6.toLocaleString();
+  document.getElementById('tvb').textContent='~'+breakeven+' mo';
+  document.getElementById('tv36').textContent='S$'+yr3.toLocaleString();
+
+  const pct6=Math.min(100,Math.round((m6/totalPurchase)*100));
+  document.getElementById('tf6').style.width=pct6+'%';
+  document.getElementById('tfb').style.width='100%';
+}
+calcROI();
+
+// NAV SHADOW
+window.addEventListener('scroll',()=>{
+  document.querySelector('nav').style.boxShadow=window.scrollY>40?'0 4px 40px rgba(0,0,0,.45)':'none';
+});
+
+// MODALS
+function openM(id){document.getElementById('modal-'+id).classList.add('open');document.body.style.overflow='hidden';}
+
+function closeAllM(){document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));document.body.style.overflow='';}
+
+function closeM(id){document.getElementById('modal-'+id).classList.remove('open');document.body.style.overflow='';}
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)closeM(m.id.replace('modal-',''));});});
+
+// STEPS
+function nextStep(prefix,step){
+  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(el=>{if(el.classList.contains('m-step'))el.classList.remove('active');});
+  const target=document.getElementById(prefix+'-'+step);
+  if(target){target.classList.add('active');}
+}
+function completeFlow(prefix){
+  document.querySelectorAll('[id^="'+prefix+'-"]').forEach(el=>{if(el.classList.contains('m-step'))el.classList.remove('active');});
+  document.getElementById(prefix+'-success').classList.add('active');
+}
+
+// OPTION SELECT (radio-style within group)
+function selOpt(el,group){
+  const container=el.closest('.form-group,.m-step');
+  container.querySelectorAll('.opt-btn-full[onclick*="selOpt"]').forEach(b=>{
+    if(b.getAttribute('onclick').includes("'"+group+"'"))b.classList.remove('sel');
+  });
+  el.classList.add('sel');
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SUPABASE DATABASE SETUP — Run this SQL in Supabase SQL Editor
+   Project: htxlvfzbjiozjzumywev.supabase.co
+   ───────────────────────────────────────────────────────────────
+
+   -- 1. LEADS (Information Memorandum gate)
+   create table leads (
+     id uuid default gen_random_uuid() primary key,
+     created_at timestamptz default now(),
+     name text not null, email text not null,
+     phone text, lead_type text,
+     source text default 'information_memorandum',
+     consent boolean default false, page_url text
+   );
+
+   -- 2. SUBSCRIPTIONS (Mushroom Box)
+   create table subscriptions (
+     id uuid default gen_random_uuid() primary key,
+     created_at timestamptz default now(),
+     name text not null, email text not null,
+     postcode text, plan text, frequency text,
+     payment_method text, preferences text,
+     status text default 'pending_payment'
+   );
+
+   -- 3. FARMBOX INTERESTS
+   create table farmbox_interests (
+     id uuid default gen_random_uuid() primary key,
+     created_at timestamptz default now(),
+     full_name text not null, email text not null,
+     phone text, purchaser_type text,
+     units_requested text, acknowledgements text,
+     status text default 'new'
+   );
+
+   -- 4. BOOKINGS (Workshops / Tours / Cooking Classes)
+   create table bookings (
+     id uuid default gen_random_uuid() primary key,
+     created_at timestamptz default now(),
+     experience text, preferred_date date,
+     pax_count text, name text not null,
+     email text not null, phone text,
+     notes text, status text default 'enquiry'
+   );
+
+   -- 5. CORPORATE ENQUIRIES
+   create table corporate_enquiries (
+     id uuid default gen_random_uuid() primary key,
+     created_at timestamptz default now(),
+     programme text, company_name text not null,
+     contact_name text, email text not null,
+     phone text, pax_count text,
+     preferred_date date, notes text,
+     status text default 'new'
+   );
+
+   -- 6. SCHOOL BOOKINGS
+   create table school_bookings (
+     id uuid default gen_random_uuid() primary key,
+     created_at timestamptz default now(),
+     education_level text, school_name text not null,
+     teacher_name text, email text not null,
+     phone text, student_count text,
+     preferred_date date, notes text,
+     status text default 'enquiry'
+   );
+
+   -- 7. WHOLESALE ENQUIRIES
+   create table wholesale_enquiries (
+     id uuid default gen_random_uuid() primary key,
+     created_at timestamptz default now(),
+     business_name text not null, contact_name text,
+     email text not null, phone text,
+     varieties_requested text, weekly_volume_kg text,
+     notes text, status text default 'new'
+   );
+
+   -- RLS: Enable row level security on all tables
+   do $$ declare t text; begin
+     for t in select unnest(array['leads','subscriptions','farmbox_interests',
+       'bookings','corporate_enquiries','school_bookings','wholesale_enquiries'])
+     loop
+       execute format('alter table %I enable row level security', t);
+       execute format('create policy "public_insert_%I" on %I for insert with check (true)', t, t);
+     end loop;
+   end $$;
+
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   MYCOSG BACKEND — Supabase Integration
+   Project: htxlvfzbjiozjzumywev.supabase.co
+   
+   SETUP:  Paste your anon key from:
+           Supabase → Project Settings → API → Project API keys → anon public
+   ═══════════════════════════════════════════════════════════════ */
+
+const SUPABASE_URL     = 'https://htxlvfzbjiozjzumywev.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh0eGx2Znpiamlvemp6dW15d2V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMzY0NTAsImV4cCI6MjA5MDYxMjQ1MH0.mTQwrrCdx0H7WKEdKLc1_srMvj4HcrpNA6yAHkrLUgU';
+
+let db = null;
+
+function initSupabase() {
+  try {
+    if (window.supabase && SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.startsWith('eyJ')) {
+      db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('%cMycoSG backend connected ✓', 'color:#8fbc6e;font-weight:bold;font-size:14px');
+    } else {
+      console.warn('MycoSG: Running in demo mode — Supabase SDK not loaded or key invalid.');
+    }
+  } catch(e) {
+    console.error('Supabase init error:', e);
+  }
+}
+
+// Init immediately if SDK already loaded, else wait for it
+if (window.supabase) {
+  initSupabase();
+} else {
+  window.addEventListener('load', initSupabase);
+}
+
+/* ── HELPERS ──────────────────────────────────────────────── */
+async function dbInsert(table, data) {
+  if (!db) {
+    console.log('[DEMO MODE] Would insert into', table, data);
+    await new Promise(r => setTimeout(r, 600));
+    return { ok: true, demo: true };
+  }
+  const { error } = await db.from(table).insert([data]);
+  if (error) throw error;
+  return { ok: true };
+}
+
+async function sendEmail(type, payload) {
+  /* Calls Supabase Edge Function 'send-email' — deploy separately.
+     Falls back silently if not deployed. */
+  if (!db) return;
+  try {
+    await db.functions.invoke('send-email', { body: { type, payload } });
+  } catch(e) { console.warn('Email function not deployed:', e.message); }
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 6000);
+}
+
+function setBtnLoading(id, loading, defaultText) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.innerHTML = loading
+    ? '<span class="spinner"></span>Submitting...'
+    : defaultText;
+}
+
+function goSuccess(prefix) {
+  // Hide all m-step divs whose id starts with prefix-
+  document.querySelectorAll('.m-step').forEach(el => {
+    if (el.id && el.id.startsWith(prefix + '-')) {
+      el.classList.remove('active');
+    }
+  });
+  const s = document.getElementById(prefix + '-success');
+  if (s) s.classList.add('active');
+}
+
+/* ── 1. LEAD CAPTURE (Information Memorandum gate) ───────── */
+async function submitLeadCapture() {
+  const name    = document.getElementById('lc-name')?.value.trim();
+  const email   = document.getElementById('lc-email')?.value.trim();
+  const phone   = document.getElementById('lc-phone')?.value.trim();
+  const type    = document.getElementById('lc-type')?.value;
+  const consent = document.getElementById('lc-consent')?.classList.contains('sel');
+
+  if (!name || !email) return showErr('lc-error', 'Please enter your name and email.');
+  if (!/\S+@\S+\.\S+/.test(email)) return showErr('lc-error', 'Please enter a valid email address.');
+  if (!consent) return showErr('lc-error', 'Please confirm your consent to continue.');
+
+  setBtnLoading('lc-submit', true);
+  try {
+    await dbInsert('leads', {
+      name, email, phone, lead_type: type, consent,
+      source: 'information_memorandum',
+      page_url: window.location.href
+    });
+    await sendEmail('im_request', { name, email, phone, lead_type: type });
+    // Show success and unlock IM
+    document.querySelectorAll('#modal-lead-capture .m-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('lc-success').classList.add('active');
+  } catch(err) {
+    console.error('Lead capture error:', err);
+    const msg = err?.message || err?.details || 'Something went wrong. Please try again or contact us.';
+    showErr('lc-error', msg.includes('duplicate') ? 'This email has already been registered.' : 'Submission failed — please try again.');
+  } finally {
+    setBtnLoading('lc-submit', false, 'Access Information Memorandum →');
+  }
+}
+
+/* ── 2. MUSHROOM BOX SUBSCRIPTION ───────────────────────── */
+async function submitSubscription() {
+  const plan    = document.querySelector('#sub-1 .opt-btn-full.sel')?.textContent.trim().split('—')[0].trim();
+  const freq    = document.querySelector('#sub-1 .opt-btn.sel')?.textContent.trim();
+  const name    = document.getElementById('sub-name')?.value.trim();
+  const email   = document.getElementById('sub-email')?.value.trim();
+  const postcode = document.getElementById('sub-postcode')?.value.trim();
+  const payment = document.getElementById('sub-payment')?.value;
+  const prefs   = [...document.querySelectorAll('#sub-2 .opt-btn.sel')].map(b => b.textContent.trim());
+
+  if (!name || !email) return showErr('sub-error', 'Please enter your name and email.');
+  if (!/\S+@\S+\.\S+/.test(email)) return showErr('sub-error', 'Please enter a valid email address.');
+  if (!postcode) return showErr('sub-error', 'Please enter your delivery postcode.');
+
+  setBtnLoading('sub-submit', true);
+  try {
+    await dbInsert('subscriptions', {
+      name, email, postcode, plan, frequency: freq,
+      payment_method: payment,
+      preferences: prefs.join(', '),
+      status: 'pending_payment'
+    });
+    await sendEmail('subscription_confirmation', { name, email, plan, freq, postcode });
+    goSuccess('sub');
+  } catch(err) {
+    console.error('Submit error:', err);
+    showErr('sub-error', err?.message || 'Submission failed. Please try again.');
+  } finally {
+    setBtnLoading('sub-submit', false, 'Confirm Subscription →');
+  }
+}
+
+/* ── 3. FARMBOX EXPRESSION OF INTEREST ──────────────────── */
+async function submitFarmboxInterest() {
+  const units    = document.querySelector('#own-1 .opt-btn-full.sel')?.textContent.trim();
+  const fullname = document.getElementById('own-fullname')?.value.trim();
+  const email    = document.getElementById('own-email')?.value.trim();
+  const phone    = document.getElementById('own-phone')?.value.trim();
+  const ptype    = document.getElementById('own-ptype')?.value;
+  const checks   = [...document.querySelectorAll('#own-3 .opt-btn-full.sel')].map(b => b.textContent.trim());
+
+  if (!fullname || !email) return showErr('own-error', 'Please enter your legal name and email.');
+  if (!/\S+@\S+\.\S+/.test(email)) return showErr('own-error', 'Please enter a valid email address.');
+  if (checks.length < 2) return showErr('own-error', 'Please confirm all acknowledgements to proceed.');
+
+  setBtnLoading('own-submit', true);
+  try {
+    await dbInsert('farmbox_interests', {
+      full_name: fullname, email, phone,
+      purchaser_type: ptype,
+      units_requested: units,
+      acknowledgements: checks.join(' | '),
+      status: 'new'
+    });
+    await sendEmail('farmbox_interest', { fullname, email, phone, ptype, units });
+    goSuccess('own');
+  } catch(err) {
+    console.error('Submit error:', err);
+    showErr('own-error', err?.message || 'Submission failed. Please try again.');
+  } finally {
+    setBtnLoading('own-submit', false, 'Submit Expression of Interest →');
+  }
+}
+
+/* ── 4. EXPERIENCE / WORKSHOP BOOKING ───────────────────── */
+async function submitBooking() {
+  const experience = document.querySelector('#bk-1 .opt-btn-full.sel')?.textContent.trim().split('—')[0].trim();
+  const date       = document.getElementById('bk-date')?.value;
+  const pax        = document.querySelector('#bk-1 .opt-btn.sel')?.textContent.trim();
+  const name       = document.getElementById('bk-name')?.value.trim();
+  const email      = document.getElementById('bk-email')?.value.trim();
+  const phone      = document.getElementById('bk-phone')?.value.trim();
+  const notes      = document.getElementById('bk-notes')?.value.trim();
+
+  if (!name || !email) return showErr('bk-error', 'Please enter your name and email.');
+  if (!/\S+@\S+\.\S+/.test(email)) return showErr('bk-error', 'Please enter a valid email address.');
+
+  setBtnLoading('bk-submit', true);
+  try {
+    await dbInsert('bookings', {
+      experience, preferred_date: date || null,
+      pax_count: pax, name, email, phone,
+      notes, status: 'enquiry'
+    });
+    await sendEmail('booking_enquiry', { name, email, phone, experience, date, pax, notes });
+    goSuccess('bk');
+  } catch(err) {
+    console.error('Submit error:', err);
+    showErr('bk-error', err?.message || 'Submission failed. Please try again.');
+  } finally {
+    setBtnLoading('bk-submit', false, 'Confirm Booking →');
+  }
+}
+
+/* ── 5. CORPORATE EVENTS ENQUIRY ────────────────────────── */
+async function submitCorporate() {
+  const programme  = document.getElementById('corp-programme')?.value;
+  const company    = document.getElementById('corp-company')?.value.trim();
+  const contact    = document.getElementById('corp-contact')?.value.trim();
+  const email      = document.getElementById('corp-email')?.value.trim();
+  const phone      = document.getElementById('corp-phone')?.value.trim();
+  const pax        = document.getElementById('corp-pax')?.value.trim();
+  const date       = document.getElementById('corp-date')?.value;
+  const notes      = document.getElementById('corp-notes')?.value.trim();
+
+  if (!company || !email || !contact) return showErr('corp-error', 'Please fill in company, contact name and email.');
+  if (!/\S+@\S+\.\S+/.test(email)) return showErr('corp-error', 'Please enter a valid email address.');
+
+  setBtnLoading('corp-submit', true);
+  try {
+    await dbInsert('corporate_enquiries', {
+      programme, company_name: company,
+      contact_name: contact, email, phone,
+      pax_count: pax, preferred_date: date || null,
+      notes, status: 'new'
+    });
+    await sendEmail('corporate_enquiry', { programme, company, contact, email, phone, pax, date, notes });
+    goSuccess('corp');
+  } catch(err) {
+    console.error('Submit error:', err);
+    showErr('corp-error', err?.message || 'Submission failed. Please try again.');
+  } finally {
+    setBtnLoading('corp-submit', false, 'Send Enquiry →');
+  }
+}
+
+/* ── 6. SCHOOLS PROGRAMME BOOKING ───────────────────────── */
+async function submitSchools() {
+  const level   = document.getElementById('sch-level')?.value;
+  const school  = document.getElementById('sch-school')?.value.trim();
+  const teacher = document.getElementById('sch-teacher')?.value.trim();
+  const email   = document.getElementById('sch-email')?.value.trim();
+  const phone   = document.getElementById('sch-phone')?.value.trim();
+  const students = document.getElementById('sch-students')?.value.trim();
+  const date    = document.getElementById('sch-date')?.value;
+  const notes   = document.getElementById('sch-notes')?.value.trim();
+
+  if (!school || !teacher || !email) return showErr('sch-error', 'Please fill in school, teacher name and email.');
+  if (!/\S+@\S+\.\S+/.test(email)) return showErr('sch-error', 'Please enter a valid email address.');
+
+  setBtnLoading('sch-submit', true);
+  try {
+    await dbInsert('school_bookings', {
+      education_level: level, school_name: school,
+      teacher_name: teacher, email, phone,
+      student_count: students, preferred_date: date || null,
+      notes, status: 'enquiry'
+    });
+    await sendEmail('school_booking', { level, school, teacher, email, phone, students, date, notes });
+    goSuccess('sch');
+  } catch(err) {
+    console.error('Submit error:', err);
+    showErr('sch-error', err?.message || 'Submission failed. Please try again.');
+  } finally {
+    setBtnLoading('sch-submit', false, 'Submit Booking →');
+  }
+}
+
+/* ── 7. WHOLESALE / FRESH VARIETIES ENQUIRY ─────────────── */
+async function submitWholesale() {
+  const business = document.getElementById('ws-business')?.value.trim();
+  const contact  = document.getElementById('ws-contact')?.value.trim();
+  const email    = document.getElementById('ws-email')?.value.trim();
+  const phone    = document.getElementById('ws-phone')?.value.trim();
+  const varieties = [...document.querySelectorAll('#ws-varieties .opt-btn.sel')].map(b => b.textContent.trim());
+  const volume   = document.getElementById('ws-volume')?.value.trim();
+  const notes    = document.getElementById('ws-notes')?.value.trim();
+
+  if (!business || !email) return showErr('ws-error', 'Please enter your business name and email.');
+  if (!/\S+@\S+\.\S+/.test(email)) return showErr('ws-error', 'Please enter a valid email address.');
+
+  setBtnLoading('ws-submit', true);
+  try {
+    await dbInsert('wholesale_enquiries', {
+      business_name: business, contact_name: contact,
+      email, phone,
+      varieties_requested: varieties.join(', '),
+      weekly_volume_kg: volume, notes, status: 'new'
+    });
+    await sendEmail('wholesale_enquiry', { business, contact, email, phone, varieties: varieties.join(', '), volume, notes });
+    goSuccess('ws');
+  } catch(err) {
+    console.error('Submit error:', err);
+    showErr('ws-error', err?.message || 'Submission failed. Please try again.');
+  } finally {
+    setBtnLoading('ws-submit', false, 'Send Enquiry →');
+  }
+}
+
+</script>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<div class="modal-overlay" id="modal-how-it-works">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('how-it-works')">✕</button>
+    <h3>How FarmBox Ownership Works</h3>
+    <div class="modal-sub">Two-contract structure · Equipment + Management</div>
+    <div class="cm-hero">
+      <h4>You own the asset. We run the farm.</h4>
+      <p>The MycoSG FarmBox Programme is a two-contract commercial arrangement. You purchase a fully-equipped 40ft growing container — title transfers to you. MycoSG operates it under a separate Farm Management Services Agreement and pays you 70% of monthly net production revenue.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Contract 1 — Equipment Sale Agreement</h4>
+      <div class="cm-step-row"><span class="cm-step-num">01</span><span class="cm-step-text">You purchase a FarmBox unit at <strong style="color:var(--cream)">S$58,000</strong>. Full legal title transfers to you upon receipt of payment.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">02</span><span class="cm-step-text">The unit is recorded on your balance sheet as a fixed asset. You may depreciate it over its useful life of 8–10 years.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">03</span><span class="cm-step-text">You may resell or transfer the unit at any time, subject to MycoSG's right of first refusal at fair market value.</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Contract 2 — Farm Management Services Agreement</h4>
+      <div class="cm-step-row"><span class="cm-step-num">01</span><span class="cm-step-text">MycoSG manages all operations: substrate sourcing, inoculation, cultivation, harvest, sales, and cold-chain distribution.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">02</span><span class="cm-step-text">MycoSG bears <strong style="color:var(--cream)">all operating costs</strong> (electricity, labour, substrate, maintenance, logistics) from its 30% management fee.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">03</span><span class="cm-step-text">You receive <strong style="color:var(--cream)">70% of monthly net production revenue</strong> as a variable output service fee, paid within 15 days of month-end.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">04</span><span class="cm-step-text">Monthly statements with full harvest data, sales records, and IoT performance reports are sent to every unit owner.</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Regulatory Structure</h4>
+      <p>This programme is offered under the <strong style="color:var(--cream)">Small Offers Exemption</strong> pursuant to Section 272A of the Securities and Futures Act (Cap. 289). Offers are limited to a maximum of 50 persons within any 12-month period. This is an equipment purchase, not a regulated financial product.</p>
+    </div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('how-it-works');openM('lead-capture')">View Information Memorandum →</button>
+      <button class="btn-outline" onclick="closeM('how-it-works');openM('esa')">Equipment Sale Agreement</button>
+      <button class="btn-outline" onclick="closeM('how-it-works');openM('fmsa')">Farm Management Agreement</button>
+      <button class="btn-outline" onclick="closeM('how-it-works');openM('rds')" style="border-color:var(--rust);color:var(--rust);">Risk Disclosure</button>
+      <button class="btn-outline" onclick="closeM('how-it-works');openM('own')">Express Interest</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ OWNER DASHBOARD ═══ -->
+<div class="modal-overlay" id="modal-owner-dashboard">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('owner-dashboard')">✕</button>
+    <h3>Owner Dashboard</h3>
+    <div class="modal-sub">Real-time monitoring · Monthly reports · Performance data</div>
+    <div class="cm-hero">
+      <h4>Your farm, always in your hands.</h4>
+      <p>Every FarmBox owner receives access to a live dashboard showing real-time environmental data, harvest logs, sales records, and monthly financial statements — directly from your container's IoT sensors.</p>
+    </div>
+    <!-- Mock dashboard stats -->
+    <div class="cm-grid">
+      <div class="dashboard-stat"><span class="ds-val">642 kg</span><span class="ds-lbl">Harvest This Month</span></div>
+      <div class="dashboard-stat"><span class="ds-val">S$3,850</span><span class="ds-lbl">Owner Fee (Pending)</span></div>
+      <div class="dashboard-stat"><span class="ds-val">18.4°C</span><span class="ds-lbl">Fruiting Room Temp</span></div>
+      <div class="dashboard-stat"><span class="ds-val">91%</span><span class="ds-lbl">Relative Humidity</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>What You Can Track</h4>
+      <div class="cm-grid">
+        <div class="cm-card"><span class="cc-icon">📡</span><div class="cc-title">Live IoT Sensors</div><div class="cc-desc">CO₂, temperature, humidity, and airflow updated every 5 minutes from your container.</div></div>
+        <div class="cm-card"><span class="cc-icon">🍄</span><div class="cc-title">Harvest Logs</div><div class="cc-desc">Weekly harvest weights by variety with photos from each fruiting cycle.</div></div>
+        <div class="cm-card"><span class="cc-icon">💰</span><div class="cc-title">Revenue Statements</div><div class="cc-desc">Monthly breakdown of gross sales, operating costs deducted, and your 70% owner fee.</div></div>
+        <div class="cm-card"><span class="cc-icon">🔧</span><div class="cc-title">Maintenance Log</div><div class="cc-desc">All servicing, HVAC maintenance, and substrate batch records with dates and notes.</div></div>
+      </div>
+    </div>
+    <div class="cm-section">
+      <h4>Monthly Owner Report Includes</h4>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">Total harvest weight by mushroom variety</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">Gross revenue from wholesale and retail channels</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">MycoSG operating cost deductions (itemised)</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">Your net output fee and payment confirmation</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">Next month production forecast and planned varieties</span></div>
+    </div>
+    <div class="info-box">Dashboard access is granted within 48 hours of contract signing. You will receive login credentials via email along with your Equipment Sale Agreement.</div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('owner-dashboard');openM('own')">Become an Owner →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FAQ ═══ -->
+<div class="modal-overlay" id="modal-faq">
+  <div class="modal content-modal" style="max-width:640px;">
+    <button class="modal-close" onclick="closeM('faq')">✕</button>
+    <h3>Frequently Asked Questions</h3>
+    <div class="modal-sub">FarmBox Programme · Subscriptions · Wellness</div>
+    <div class="cm-section">
+      <h4>FarmBox Ownership</h4>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">Is this an investment product regulated by MAS?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">No. This is a commercial equipment purchase paired with a farm management services contract. It is not a collective investment scheme. It is offered under the Small Offers Exemption (Section 272A, SFA) and is not a regulated financial product. We strongly encourage independent legal advice before proceeding.</div>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">Can I visit my FarmBox container?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">Yes. All unit owners can schedule visits to their container anytime during operating hours. Multi-unit owners (Tier 2 and above) receive complimentary quarterly farm visit packages. Simply contact your account manager to arrange.</div>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">What happens if my container suffers a contamination event?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">Contamination risk is the primary operational risk in mushroom farming and is clearly disclosed in the Information Memorandum. Our biosecure container design reduces contamination rates by over 60% vs open-air farms. In the event of a contamination event, affected bags are cleared and restocked at MycoSG's cost, with production resuming within 2–4 weeks. Output fees are not paid during non-production periods.</div>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">Can I sell my FarmBox unit?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">Yes. You own the physical asset and may sell or transfer it. MycoSG holds a right of first refusal at fair market value. If MycoSG declines, you may sell to any third party subject to them entering into a new Farm Management Services Agreement with MycoSG.</div>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">Are output fees guaranteed?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">No. Output fees are variable and directly tied to production output. The three-scenario model in the Information Memorandum represents modelled estimates, not guarantees. Actual returns depend on yields, market pricing, and operating conditions.</div>
+    </div>
+    <div class="cm-section">
+      <h4>Mushroom Box Subscriptions</h4>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">How fresh are the mushrooms?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">Every box is packed within 24 hours of harvest and delivered the same or next day via cold chain. Our containers are located close to delivery hubs, so your mushrooms are never more than 36 hours from fruiting body to your door.</div>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">Can I pause or cancel my subscription?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">Yes, with no fees or penalties. Pause for up to 3 months at any time. Cancel anytime with 48 hours notice before your next dispatch. No lock-in, no minimum commitment.</div>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">Do you deliver island-wide in Singapore?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">Yes. We deliver to all residential and commercial addresses in Singapore, including HDB, condominiums, and offices. Delivery windows are 9am–1pm or 2pm–6pm on your chosen day.</div>
+    </div>
+    <div class="cm-section">
+      <h4>Wellness Products</h4>
+      <div class="cm-step-row"><span class="cm-step-num" style="width:auto;margin-right:.5rem;opacity:1;color:var(--spore);">Q</span><span class="cm-step-text" style="color:var(--cream);font-weight:500;">Are your extracts HSA-compliant?</span></div>
+      <div style="margin-left:1.5rem;margin-bottom:1rem;font-size:.82rem;color:rgba(245,240,232,.62);line-height:1.65;">All health benefit claims on our products comply with HSA's Regulatory Guidelines for Traditional Medicines and Health Supplements. We do not make therapeutic claims. Our products are sold as food supplements.</div>
+    </div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('faq');openM('subscribe')">Start Your Mushroom Box →</button>
+      <button class="btn-outline" onclick="closeM('faq');openM('lead-capture')">View Information Memorandum</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FRESH VARIETIES ═══ -->
+<div class="modal-overlay" id="modal-fresh-varieties">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('fresh-varieties')">✕</button>
+    <h3>Fresh Varieties</h3>
+    <div class="modal-sub">Harvested to order · 18+ varieties grown year-round</div>
+    <div class="cm-hero">
+      <h4>Farm-direct, never warehoused.</h4>
+      <p>Every variety is grown in our climate-controlled FarmBox containers and harvested within 24 hours of your delivery. No cold storage, no imports, no compromise on flavour.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Gourmet Varieties</h4>
+      <div class="cm-price-row"><span class="cpr-name">🦁 Lion's Mane <em style="font-size:.7rem;color:var(--spore)">(Hericium erinaceus)</em></span><span class="cpr-price">S$22 / 200g</span></div>
+      <div class="cm-price-row"><span class="cpr-name">👑 King Trumpet <em style="font-size:.7rem;color:var(--spore)">(Pleurotus eryngii)</em></span><span class="cpr-price">S$12 / 200g</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🌸 Pink Oyster <em style="font-size:.7rem;color:var(--spore)">(Pleurotus djamor)</em></span><span class="cpr-price">S$14 / 200g</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🪨 Grey Oyster <em style="font-size:.7rem;color:var(--spore)">(Pleurotus ostreatus)</em></span><span class="cpr-price">S$10 / 200g</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🌰 Chestnut / Shimeji <em style="font-size:.7rem;color:var(--spore)">(Hypsizygus tessellatus)</em></span><span class="cpr-price">S$10 / 200g</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🟤 Shiitake <em style="font-size:.7rem;color:var(--spore)">(Lentinula edodes)</em></span><span class="cpr-price">S$12 / 200g</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Medicinal Varieties</h4>
+      <div class="cm-price-row"><span class="cpr-name">🔴 Reishi <em style="font-size:.7rem;color:var(--spore)">(Ganoderma lucidum)</em></span><span class="cpr-price">S$28 / 100g dried</span></div>
+      <div class="cm-price-row"><span class="cpr-name">⚡ Cordyceps <em style="font-size:.7rem;color:var(--spore)">(Cordyceps militaris)</em></span><span class="cpr-price">S$32 / 100g fresh</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🍂 Turkey Tail <em style="font-size:.7rem;color:var(--spore)">(Trametes versicolor)</em></span><span class="cpr-price">S$22 / 100g dried</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Availability &amp; Ordering</h4>
+      <p>Fresh varieties are available weekly subject to harvest cycles. Subscribe to a Mushroom Box for guaranteed allocation, or order individual varieties via our online store. Restaurants and food businesses may enquire about wholesale pricing.</p>
+      <div style="margin-top:.8rem;"><span class="cm-tag">Islandwide Delivery</span><span class="cm-tag">24h from Harvest</span><span class="cm-tag">No Pesticides</span><span class="cm-tag">Zero Cold Storage</span><span class="cm-tag">Wholesale Available</span></div>
+    </div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('fresh-varieties');openM('subscribe')" style="margin-right:.5rem">Start a Mushroom Box →</button><button class="btn-outline" onclick="closeM('fresh-varieties');openM('wholesale')">Wholesale Enquiry</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WELLNESS DETAIL ═══ -->
+<div class="modal-overlay" id="modal-wellness-detail">
+  <div class="modal content-modal" style="max-width:640px;">
+    <button class="modal-close" onclick="closeM('wellness-detail')">✕</button>
+    <h3>Wellness Products</h3>
+    <div class="modal-sub">Tinctures · Capsules · Powders · HSA Compliant</div>
+    <div class="cm-hero">
+      <h4>Dual-extraction. Maximum bioavailability.</h4>
+      <p>Our tinctures use both hot water extraction (for beta-glucans) and ethanol extraction (for terpenoids), ensuring the full spectrum of active compounds from each mushroom. All products comply with HSA supplement guidelines. Health claims are educational only — not medical advice.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Tinctures (30ml Dual-Extract)</h4>
+      <div class="cm-price-row"><span class="cpr-name">🧠 Lion's Mane — Focus &amp; Cognition</span><span class="cpr-price">S$38</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🛡️ Immunity Shield — Turkey Tail + Reishi</span><span class="cpr-price">S$42</span></div>
+      <div class="cm-price-row"><span class="cpr-name">⚡ Cordyceps — Energy &amp; Endurance</span><span class="cpr-price">S$45</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🌙 Reishi — Sleep &amp; Calm</span><span class="cpr-price">S$38</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Capsules (60-count)</h4>
+      <div class="cm-price-row"><span class="cpr-name">Lion's Mane 500mg — 8:1 Extract</span><span class="cpr-price">S$48</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Reishi 400mg — Dual Extract</span><span class="cpr-price">S$48</span></div>
+      <div class="cm-price-row"><span class="cpr-name">5-Mushroom Immunity Blend</span><span class="cpr-price">S$52</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Powders (100g)</h4>
+      <div class="cm-price-row"><span class="cpr-name">Lion's Mane Powder — Culinary Grade</span><span class="cpr-price">S$32</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Reishi Powder — Beverage Grade</span><span class="cpr-price">S$30</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Cordyceps Powder — Sport Grade</span><span class="cpr-price">S$38</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Our Extraction Process</h4>
+      <div class="cm-step-row"><span class="cm-step-num">01</span><span class="cm-step-text"><strong style="color:var(--cream)">Hot water extraction</strong> — mushrooms are simmered for 4–8 hours to release water-soluble beta-glucans and polysaccharides.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">02</span><span class="cm-step-text"><strong style="color:var(--cream)">Ethanol extraction</strong> — the marc is then macerated in food-grade ethanol to extract fat-soluble triterpenes and terpenoids.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">03</span><span class="cm-step-text"><strong style="color:var(--cream)">Combination &amp; concentration</strong> — both extracts are combined and concentrated into a final dual-extract ratio of 8:1 or higher.</span></div>
+    </div>
+    <p style="font-size:.7rem;color:rgba(245,240,232,.3);font-family:'DM Mono',monospace;margin-top:.5rem;">⚠ Not intended to diagnose, treat, cure or prevent any disease. Consult a qualified healthcare professional before use. Products comply with HSA Regulatory Guidelines for Health Supplements.</p>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('wellness-detail');openM('subscribe')">Add to Mushroom Box →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GROW KITS ═══ -->
+<div class="modal-overlay" id="modal-grow-kits">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('grow-kits')">✕</button>
+    <h3>Home Grow Kits</h3>
+    <div class="modal-sub">Start your first flush in 10–14 days</div>
+    <div class="cm-hero">
+      <h4>Bring the farm home.</h4>
+      <p>Our grow kits are pre-inoculated substrate blocks — ready to fruit straight out of the box. No equipment needed beyond misting once or twice a day. Each kit produces 2–3 flushes over 4–6 weeks.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Available Kits</h4>
+      <div class="cm-price-row"><span class="cpr-name">🦁 Lion's Mane Grow Kit <em style="font-size:.7rem;color:var(--spore)">Beginner-friendly</em></span><span class="cpr-price">S$28</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🪨 Grey Oyster Grow Kit <em style="font-size:.7rem;color:var(--spore)">Fastest flush (5–7 days)</em></span><span class="cpr-price">S$22</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🌸 Pink Oyster Grow Kit <em style="font-size:.7rem;color:var(--spore)">Tropical variety — loves heat</em></span><span class="cpr-price">S$24</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🌰 Chestnut Shimeji Kit <em style="font-size:.7rem;color:var(--spore)">Classic Japanese variety</em></span><span class="cpr-price">S$24</span></div>
+      <div class="cm-price-row"><span class="cpr-name">🎁 Discovery Bundle (3 kits)</span><span class="cpr-price">S$62 <em style="font-size:.7rem;color:var(--spore)">(save S$10)</em></span></div>
+    </div>
+    <div class="cm-section">
+      <h4>How to Grow</h4>
+      <div class="cm-step-row"><span class="cm-step-num">01</span><span class="cm-step-text">Remove the kit from the bag and make a 5cm X-cut on the plastic film face.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">02</span><span class="cm-step-text">Place in indirect light at room temperature (22–28°C works well in Singapore).</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">03</span><span class="cm-step-text">Mist the cut face 1–2 times daily with a spray bottle. Keep humidity high.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">04</span><span class="cm-step-text">Pins appear in 5–14 days. Harvest when caps are fully open but before edges curl up.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">05</span><span class="cm-step-text">After harvest, rest the block for 5–7 days, then repeat for 2–3 more flushes.</span></div>
+    </div>
+    <div class="info-box">Every Mycophile subscription includes a quarterly home grow kit. Subscribe and save versus buying individually.</div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('grow-kits');openM('subscribe')">Get Kits via Subscription →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WORKSHOPS ═══ -->
+<div class="modal-overlay" id="modal-workshops">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('workshops')">✕</button>
+    <h3>Cultivation Workshops</h3>
+    <div class="modal-sub">Hands-on · Take-home grow kit included · All levels</div>
+    <div class="cm-hero">
+      <h4>Learn to grow your own food.</h4>
+      <p>Our beginner cultivation workshops take you through the full mushroom growing process — from substrate preparation to inoculation and fruiting — inside our working FarmBox facility. Every participant takes home a fully inoculated grow kit to start their first flush at home.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Workshop Schedule</h4>
+      <table class="cm-table">
+        <tr><th>Workshop</th><th>Duration</th><th>Price</th><th>Next Date</th></tr>
+        <tr><td>Beginner Cultivation</td><td>3 hours</td><td>S$85 / pax</td><td>Every 2nd Saturday</td></tr>
+        <tr><td>Substrate Science</td><td>2.5 hours</td><td>S$75 / pax</td><td>Monthly — 1st Friday</td></tr>
+        <tr><td>Advanced Inoculation</td><td>4 hours</td><td>S$120 / pax</td><td>Quarterly</td></tr>
+        <tr><td>Kids Mushroom Explorer</td><td>1.5 hours</td><td>S$45 / child</td><td>School holidays</td></tr>
+      </table>
+    </div>
+    <div class="cm-section">
+      <h4>What's Included</h4>
+      <div class="cm-grid">
+        <div class="cm-card"><span class="cc-icon">🎒</span><div class="cc-title">Take-Home Grow Kit</div><div class="cc-desc">A fully inoculated substrate block ready to fruit at home — choose your variety on the day.</div></div>
+        <div class="cm-card"><span class="cc-icon">📖</span><div class="cc-title">Recipe &amp; Care Guide</div><div class="cc-desc">Printed cultivation handbook covering substrate ratios, fruiting conditions, and troubleshooting.</div></div>
+        <div class="cm-card"><span class="cc-icon">🍄</span><div class="cc-title">Fresh Tasting</div><div class="cc-desc">End-of-session tasting of freshly harvested varieties from our fruiting room.</div></div>
+        <div class="cm-card"><span class="cc-icon">👨‍🏫</span><div class="cc-title">Expert Instructor</div><div class="cc-desc">Led by our head grower with 8+ years of commercial cultivation experience.</div></div>
+      </div>
+    </div>
+    <div class="cm-section">
+      <h4>Group &amp; Private Bookings</h4>
+      <p>Minimum 4, maximum 12 participants per session. Private workshops available for groups of 8 or more — contact us to arrange a bespoke date and programme. Corporate team-building packages available with catering add-ons.</p>
+    </div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('workshops');openM('own')">Book a Workshop →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FARM TOURS ═══ -->
+<div class="modal-overlay" id="modal-farm-tours">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('farm-tours')">✕</button>
+    <h3>FarmBox Container Tours</h3>
+    <div class="modal-sub">Behind-the-scenes · 90 minutes · Tasting included</div>
+    <div class="cm-hero">
+      <h4>See where your food comes from.</h4>
+      <p>Step inside a working MycoSG FarmBox and experience precision mushroom farming first-hand. Our guided tours cover the full growing cycle — from substrate preparation to harvest — with live IoT monitoring demonstrations and a fresh mushroom tasting session.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Tour Options</h4>
+      <div class="cm-price-row"><span class="cpr-name">Public Tour <em style="font-size:.7rem;color:var(--spore)">Min. 4 / Max. 15 pax</em></span><span class="cpr-price">S$35 / pax</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Private Group Tour <em style="font-size:.7rem;color:var(--spore)">Exclusive booking</em></span><span class="cpr-price">S$320 / group</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Schools &amp; Institutions <em style="font-size:.7rem;color:var(--spore)">Up to 30 students</em></span><span class="cpr-price">S$20 / student</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Corporate (with catering) <em style="font-size:.7rem;color:var(--spore)">Custom programme</em></span><span class="cpr-price">From S$800</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Tour Itinerary (90 min)</h4>
+      <div class="cm-step-row"><span class="cm-step-num">00:00</span><span class="cm-step-text">Welcome and introduction to MycoSG — our story and why Singapore needs local mushroom farming.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">00:15</span><span class="cm-step-text">Substrate preparation zone — see how we source and process coffee grounds, okara, and brewery grain into growing media.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">00:35</span><span class="cm-step-text">Colonisation and fruiting rooms — walk through active growing chambers with live IoT sensor readings on display.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">01:00</span><span class="cm-step-text">Harvest demonstration — watch a live harvest of whichever varieties are at peak readiness on the day.</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">01:15</span><span class="cm-step-text">Tasting and Q&amp;A — sample freshly harvested mushrooms, prepared simply to highlight natural flavour.</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>What to Bring</h4>
+      <p>Closed-toe shoes required inside the containers. No prior knowledge needed. Tours run rain or shine. Private tour dates available on request — typically 2 weeks lead time for groups over 20.</p>
+    </div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('farm-tours');openM('book-experience')">Book a Tour →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COOKING CLASSES ═══ -->
+<div class="modal-overlay" id="modal-cooking-classes">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('cooking-classes')">✕</button>
+    <h3>Mushroom Cooking Masterclass</h3>
+    <div class="modal-sub">Chef-led · 2.5 hours · Recipe book included</div>
+    <div class="cm-hero">
+      <h4>Unlock the full potential of fungi.</h4>
+      <p>Most people boil or fry mushrooms. Our chef-led masterclass explores the full culinary range — from deep umami stocks and risottos to crispy king trumpet steaks and lion's mane crab cakes. You'll leave with confidence, new techniques, and a recipe book to recreate everything at home.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Class Schedule &amp; Pricing</h4>
+      <div class="cm-price-row"><span class="cpr-name">Fundamentals — Stocks, Sautés &amp; Sides</span><span class="cpr-price">S$120 / pax</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Advanced — Mains &amp; Fine Dining Techniques</span><span class="cpr-price">S$150 / pax</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Wellness Cooking — Medicinal Mushrooms in Food</span><span class="cpr-price">S$130 / pax</span></div>
+      <div class="cm-price-row"><span class="cpr-name">Private Class (up to 8 pax)</span><span class="cpr-price">S$900 flat</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Sample Menu — Fundamentals Class</h4>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text"><strong style="color:var(--cream)">Dashi-style mushroom stock</strong> — building umami depth from shiitake and king trumpet</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text"><strong style="color:var(--cream)">Crispy king trumpet scallops</strong> — the technique for a perfect sear without steaming</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text"><strong style="color:var(--cream)">Lion's mane crab cake</strong> — texture transformation using cold water extraction</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text"><strong style="color:var(--cream)">Chestnut mushroom rice</strong> — hawker-style claypot adaptation</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text"><strong style="color:var(--cream)">Reishi honey dessert</strong> — adaptogenic finishing touch</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>What's Included</h4>
+      <p>All ingredients, equipment, and aprons provided. Printed recipe book with all dishes covered plus 20 bonus recipes. Take-home box of fresh mushrooms used in class. Alchemist-tier subscription discount of 15% offered to all participants.</p>
+    </div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('cooking-classes');openM('book-experience')">Book a Class →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CORPORATE EVENTS ═══ -->
+<div class="modal-overlay" id="modal-corporate-events">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('corporate-events')">✕</button>
+    <h3>Corporate Events</h3>
+    <div class="modal-sub">Team building · Lunch &amp; Learn · Sustainability programmes</div>
+    <div class="cm-hero">
+      <h4>Meaningful team experiences rooted in food science.</h4>
+      <p>From intimate team bonding sessions to large-scale sustainability workshops, MycoSG designs bespoke corporate programmes that connect your team with Singapore's urban food future — hands-on, memorable, and always delicious.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Corporate Programmes</h4>
+      <div class="cm-grid">
+        <div class="cm-card"><span class="cc-icon">🌱</span><div class="cc-title">Team Grow Challenge</div><div class="cc-desc">Teams inoculate and care for their own grow kits over 2 weeks, competing for best yield. Includes kick-off workshop and follow-up harvest celebration dinner. From S$80 / pax.</div></div>
+        <div class="cm-card"><span class="cc-icon">🏭</span><div class="cc-title">Container Farm Immersion</div><div class="cc-desc">Half-day behind-the-scenes experience inside our FarmBox facility. IoT demo, harvest session, chef-prepared mushroom lunch. Ideal for 10–40 pax. From S$120 / pax.</div></div>
+        <div class="cm-card"><span class="cc-icon">🍳</span><div class="cc-title">Culinary Team Challenge</div><div class="cc-desc">Teams compete in a mushroom cooking challenge using freshly harvested varieties. Chef judges, prizes, and a sit-down meal together. From S$150 / pax.</div></div>
+        <div class="cm-card"><span class="cc-icon">🎓</span><div class="cc-title">Lunch &amp; Learn</div><div class="cc-desc">45-minute presentation on Singapore's food security, urban farming technology, and the science of mycelium. Paired with a mushroom-forward catered lunch. From S$45 / pax.</div></div>
+      </div>
+    </div>
+    <div class="cm-section">
+      <h4>ESG &amp; Sustainability Credentials</h4>
+      <p>All MycoSG experiences qualify for corporate ESG reporting under Singapore Green Plan 2030 food sustainability initiatives. We provide a post-event impact report covering carbon offset equivalents, food waste diverted via our zero-waste substrate programme, and local food system contribution.</p>
+      <div style="margin-top:.8rem;"><span class="cm-tag">ESG Reportable</span><span class="cm-tag">Singapore Green Plan</span><span class="cm-tag">Zero-Waste Substrate</span><span class="cm-tag">Custom Programmes</span><span class="cm-tag">Min. 8 pax</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>How to Book</h4>
+      <p>Contact our corporate team with your group size, preferred date, and programme interest. We respond within 1 business day with a tailored proposal. Most programmes require 2 weeks lead time; large-scale events 4 weeks.</p>
+    </div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('corporate-events');openM('book-corporate')">Enquire Now →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCHOOLS PROGRAMME ═══ -->
+<div class="modal-overlay" id="modal-schools-programme">
+  <div class="modal content-modal">
+    <button class="modal-close" onclick="closeM('schools-programme')">✕</button>
+    <h3>Schools Programme</h3>
+    <div class="modal-sub">Primary · Secondary · JC · ITE · Polytechnic</div>
+    <div class="cm-hero">
+      <h4>Making food science tangible for young Singaporeans.</h4>
+      <p>Our schools programme connects the national curriculum — science, sustainability, food technology, and entrepreneurship — to a real working urban farm. Students don't just learn about food systems; they participate in one.</p>
+    </div>
+    <div class="cm-section">
+      <h4>Programme Offerings by Level</h4>
+      <table class="cm-table">
+        <tr><th>Level</th><th>Programme</th><th>Duration</th><th>Per Student</th></tr>
+        <tr><td>Primary (P4–P6)</td><td>Mushroom Explorer — Life Cycles &amp; Food</td><td>90 min</td><td>S$20</td></tr>
+        <tr><td>Secondary (Sec 1–4)</td><td>Urban Farming Science Lab</td><td>2 hours</td><td>S$25</td></tr>
+        <tr><td>JC / IB</td><td>Sustainable Food Systems Seminar</td><td>2.5 hours</td><td>S$30</td></tr>
+        <tr><td>Poly / ITE</td><td>AgriTech &amp; Controlled Environment Agriculture</td><td>3 hours</td><td>S$35</td></tr>
+      </table>
+    </div>
+    <div class="cm-section">
+      <h4>Curriculum Links</h4>
+      <div class="cm-grid">
+        <div class="cm-card"><span class="cc-icon">🔬</span><div class="cc-title">Science</div><div class="cc-desc">Fungi biology, decomposition, nutrient cycles, controlled environment agriculture, sensor technology.</div></div>
+        <div class="cm-card"><span class="cc-icon">🌍</span><div class="cc-title">Sustainability</div><div class="cc-desc">Food security, Singapore Green Plan 2030, circular economy, urban food systems, zero-waste production.</div></div>
+        <div class="cm-card"><span class="cc-icon">💡</span><div class="cc-title">Entrepreneurship</div><div class="cc-desc">Farm-to-consumer business models, agri-tech investment structures, Singapore food industry landscape.</div></div>
+        <div class="cm-card"><span class="cc-icon">🍽️</span><div class="cc-title">Food Technology</div><div class="cc-desc">Substrate fermentation, functional food science, nutraceutical extraction, flavour development.</div></div>
+      </div>
+    </div>
+    <div class="cm-section">
+      <h4>What Every School Visit Includes</h4>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">Guided FarmBox container tour with live IoT sensor demonstration</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">Age-appropriate hands-on activity (inoculation, harvest, or tasting — by level)</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">Curriculum-aligned worksheet and teacher's guide (digital)</span></div>
+      <div class="cm-step-row"><span class="cm-step-num">→</span><span class="cm-step-text">Post-visit classroom grow kit for the class to continue learning</span></div>
+    </div>
+    <div class="cm-section">
+      <h4>Booking &amp; Subsidies</h4>
+      <p>Schools may apply for MOE-approved values-in-action or environmental education funding to offset programme costs. We are registered with the Singapore Tourism Board and National Parks Board education partner lists. Contact our schools coordinator at least 3 weeks in advance for scheduling.</p>
+    </div>
+    <div class="cm-cta-row">
+      <button class="btn-primary" onclick="closeM('schools-programme');openM('book-schools')">Book for Your School →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══ BOOK EXPERIENCE (Workshops / Tours / Cooking Classes) ═══ -->
+<div class="modal-overlay" id="modal-book-experience">
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('book-experience')">✕</button>
+    <h3>Book an Experience</h3>
+    <div class="modal-sub">Workshops · Tours · Cooking Classes</div>
+    <div class="m-step active" id="bk-1">
+      <div class="form-group"><label class="form-label">Select Experience</label>
+        <button class="opt-btn-full sel" onclick="selOpt(this,'bk-exp')">🌱 Beginner Cultivation Workshop — S$85 / pax · 3 hrs</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'bk-exp')">🔬 Substrate Science Workshop — S$75 / pax · 2.5 hrs</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'bk-exp')">🏭 FarmBox Container Tour — S$35 / pax · 90 min</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'bk-exp')">👨‍🍳 Cooking Masterclass (Fundamentals) — S$120 / pax · 2.5 hrs</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'bk-exp')">👨‍🍳 Cooking Masterclass (Advanced) — S$150 / pax · 2.5 hrs</button>
+        <button class="opt-btn-full" onclick="selOpt(this,'bk-exp')">🌿 Wellness Cooking Class — S$130 / pax · 2.5 hrs</button>
+      </div>
+      <div class="form-group"><label class="form-label">Preferred Date</label>
+        <input type="date" class="form-input" id="bk-date">
+      </div>
+      <div class="form-group"><label class="form-label">Number of Participants</label>
+        <div class="opt-grid">
+          <button class="opt-btn sel" onclick="selOpt(this,'bk-pax')">1–2 pax</button>
+          <button class="opt-btn" onclick="selOpt(this,'bk-pax')">3–5 pax</button>
+          <button class="opt-btn" onclick="selOpt(this,'bk-pax')">6–10 pax</button>
+          <button class="opt-btn" onclick="selOpt(this,'bk-pax')">10+ pax</button>
+        </div>
+      </div>
+      <div class="modal-footer"><span class="step-ind">STEP 1 / 2</span><button class="btn-primary" onclick="nextStep('bk',2)">Continue →</button></div>
+    </div>
+    <div class="m-step" id="bk-2">
+      <div class="form-group"><label class="form-label">Your Name</label><input type="text" class="form-input" id="bk-name" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" id="bk-email" placeholder="you@example.com"></div>
+      <div class="form-group"><label class="form-label">Contact Number</label><input type="tel" class="form-input" id="bk-phone" placeholder="+65 9XXX XXXX"></div>
+      <div class="form-group"><label class="form-label">Special Requests (optional)</label><textarea class="form-input" id="bk-notes" rows="2" placeholder="Dietary requirements, accessibility needs, etc." style="resize:vertical;min-height:60px;"></textarea></div>
+      <div class="info-box">We confirm your booking within 24 hours and send a payment link. For groups of 10+, we'll reach out to customise the programme.</div>
+      <div class="error-box" id="bk-error"></div>
+      <div class="modal-footer"><button class="btn-outline" onclick="nextStep('bk',1)">← Back</button><span class="step-ind">STEP 2 / 2</span><button class="btn-primary" id="bk-submit" onclick="submitBooking()">Confirm Booking →</button></div>
+    </div>
+    <div class="m-step" id="bk-success">
+      <div class="success-msg">
+        <span class="s-icon">🌱</span>
+        <h4>Booking request received!</h4>
+        <p>We'll confirm your spot and send a payment link within 24 hours. A confirmation has been sent to your email. See you at the farm!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CORPORATE EVENTS BOOKING ═══ -->
+<div class="modal-overlay" id="modal-book-corporate">
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('book-corporate')">✕</button>
+    <h3>Corporate Events Enquiry</h3>
+    <div class="modal-sub">Team Building · Lunch &amp; Learn · ESG Programmes</div>
+    <div class="m-step active" id="corp-1">
+      <div class="form-group"><label class="form-label">Programme Interest</label>
+        <select class="form-select" id="corp-programme">
+          <option value="team_grow">Team Grow Challenge (from S$80/pax)</option>
+          <option value="container_immersion">Container Farm Immersion (from S$120/pax)</option>
+          <option value="culinary_challenge">Culinary Team Challenge (from S$150/pax)</option>
+          <option value="lunch_learn">Lunch &amp; Learn (from S$45/pax)</option>
+          <option value="custom">Custom Programme</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Company Name</label><input type="text" class="form-input" id="corp-company" placeholder="Your company"></div>
+      <div class="form-group"><label class="form-label">Contact Person</label><input type="text" class="form-input" id="corp-contact" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Work Email</label><input type="email" class="form-input" id="corp-email" placeholder="you@company.com"></div>
+      <div class="modal-footer"><span class="step-ind">STEP 1 / 2</span><button class="btn-primary" onclick="nextStep('corp',2)">Continue →</button></div>
+    </div>
+    <div class="m-step" id="corp-2">
+      <div class="form-group"><label class="form-label">Contact Number</label><input type="tel" class="form-input" id="corp-phone" placeholder="+65 9XXX XXXX"></div>
+      <div class="form-group"><label class="form-label">Estimated Headcount</label><input type="number" class="form-input" id="corp-pax" placeholder="e.g. 25" min="8"></div>
+      <div class="form-group"><label class="form-label">Preferred Date / Period</label><input type="date" class="form-input" id="corp-date"></div>
+      <div class="form-group"><label class="form-label">Programme Goals / Notes</label><textarea class="form-input" id="corp-notes" rows="3" placeholder="Tell us what you'd like participants to take away — we'll tailor the programme." style="resize:vertical;min-height:72px;"></textarea></div>
+      <div class="error-box" id="corp-error"></div>
+      <div class="modal-footer"><button class="btn-outline" onclick="nextStep('corp',1)">← Back</button><span class="step-ind">STEP 2 / 2</span><button class="btn-primary" id="corp-submit" onclick="submitCorporate()">Send Enquiry →</button></div>
+    </div>
+    <div class="m-step" id="corp-success">
+      <div class="success-msg">
+        <span class="s-icon">🏢</span>
+        <h4>Enquiry received!</h4>
+        <p>Our corporate team will respond within 1 business day with a tailored proposal and availability. We look forward to hosting your team.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCHOOLS PROGRAMME BOOKING ═══ -->
+<div class="modal-overlay" id="modal-book-schools">
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('book-schools')">✕</button>
+    <h3>Schools Programme Booking</h3>
+    <div class="modal-sub">Primary · Secondary · JC · Poly / ITE</div>
+    <div class="m-step active" id="sch-1">
+      <div class="form-group"><label class="form-label">Education Level</label>
+        <select class="form-select" id="sch-level">
+          <option value="primary">Primary (P4–P6) — Mushroom Explorer</option>
+          <option value="secondary">Secondary (Sec 1–4) — Urban Farming Science Lab</option>
+          <option value="jc_ib">JC / IB — Sustainable Food Systems Seminar</option>
+          <option value="poly_ite">Polytechnic / ITE — AgriTech &amp; CEA Programme</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">School Name</label><input type="text" class="form-input" id="sch-school" placeholder="Full school name"></div>
+      <div class="form-group"><label class="form-label">Teacher-in-Charge</label><input type="text" class="form-input" id="sch-teacher" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">School Email</label><input type="email" class="form-input" id="sch-email" placeholder="teacher@school.edu.sg"></div>
+      <div class="modal-footer"><span class="step-ind">STEP 1 / 2</span><button class="btn-primary" onclick="nextStep('sch',2)">Continue →</button></div>
+    </div>
+    <div class="m-step" id="sch-2">
+      <div class="form-group"><label class="form-label">Contact Number</label><input type="tel" class="form-input" id="sch-phone" placeholder="+65 9XXX XXXX"></div>
+      <div class="form-group"><label class="form-label">Number of Students</label><input type="number" class="form-input" id="sch-students" placeholder="e.g. 35" min="1"></div>
+      <div class="form-group"><label class="form-label">Preferred Visit Date</label><input type="date" class="form-input" id="sch-date"></div>
+      <div class="form-group"><label class="form-label">Curriculum Focus / Special Requirements</label><textarea class="form-input" id="sch-notes" rows="2" placeholder="e.g. link to biology chapter on decomposers, etc." style="resize:vertical;min-height:60px;"></textarea></div>
+      <div class="info-box">MOE-approved VIA / environmental education funding may offset costs. We provide all documentation needed for application.</div>
+      <div class="error-box" id="sch-error"></div>
+      <div class="modal-footer"><button class="btn-outline" onclick="nextStep('sch',1)">← Back</button><span class="step-ind">STEP 2 / 2</span><button class="btn-primary" id="sch-submit" onclick="submitSchools()">Submit Booking →</button></div>
+    </div>
+    <div class="m-step" id="sch-success">
+      <div class="success-msg">
+        <span class="s-icon">🎓</span>
+        <h4>Booking request submitted!</h4>
+        <p>Our schools coordinator will contact you within 2 business days to confirm the date and send programme details. We look forward to welcoming your students!</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ WHOLESALE ENQUIRY ═══ -->
+<div class="modal-overlay" id="modal-wholesale">
+  <div class="modal">
+    <button class="modal-close" onclick="closeM('wholesale')">✕</button>
+    <h3>Wholesale Enquiry</h3>
+    <div class="modal-sub">Restaurants · Caterers · Retailers · F&amp;B Groups</div>
+    <div class="m-step active" id="ws-1">
+      <div class="form-group"><label class="form-label">Business Name</label><input type="text" class="form-input" id="ws-business" placeholder="Restaurant / company name"></div>
+      <div class="form-group"><label class="form-label">Contact Person</label><input type="text" class="form-input" id="ws-contact" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Business Email</label><input type="email" class="form-input" id="ws-email" placeholder="you@business.com"></div>
+      <div class="form-group"><label class="form-label">Contact Number</label><input type="tel" class="form-input" id="ws-phone" placeholder="+65 9XXX XXXX"></div>
+      <div class="modal-footer"><span class="step-ind">STEP 1 / 2</span><button class="btn-primary" onclick="nextStep('ws',2)">Continue →</button></div>
+    </div>
+    <div class="m-step" id="ws-2">
+      <div class="form-group"><label class="form-label">Varieties Needed</label>
+        <div class="opt-grid" id="ws-varieties">
+          <button class="opt-btn" onclick="this.classList.toggle('sel')">Lion's Mane</button>
+          <button class="opt-btn" onclick="this.classList.toggle('sel')">King Trumpet</button>
+          <button class="opt-btn" onclick="this.classList.toggle('sel')">Pink Oyster</button>
+          <button class="opt-btn" onclick="this.classList.toggle('sel')">Grey Oyster</button>
+          <button class="opt-btn" onclick="this.classList.toggle('sel')">Shiitake</button>
+          <button class="opt-btn" onclick="this.classList.toggle('sel')">Chestnut</button>
+          <button class="opt-btn" onclick="this.classList.toggle('sel')">Reishi</button>
+          <button class="opt-btn" onclick="this.classList.toggle('sel')">Cordyceps</button>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Estimated Weekly Volume (kg)</label><input type="number" class="form-input" id="ws-volume" placeholder="e.g. 10" min="1"></div>
+      <div class="form-group"><label class="form-label">Additional Notes</label><textarea class="form-input" id="ws-notes" rows="2" placeholder="Delivery schedule, packaging requirements, etc." style="resize:vertical;min-height:60px;"></textarea></div>
+      <div class="info-box">Wholesale pricing starts from S$12–22/kg depending on variety and volume. We deliver islandwide Mon–Sat. Minimum weekly order S$80.</div>
+      <div class="error-box" id="ws-error"></div>
+      <div class="modal-footer"><button class="btn-outline" onclick="nextStep('ws',1)">← Back</button><span class="step-ind">STEP 2 / 2</span><button class="btn-primary" id="ws-submit" onclick="submitWholesale()">Send Enquiry →</button></div>
+    </div>
+    <div class="m-step" id="ws-success">
+      <div class="success-msg">
+        <span class="s-icon">🍄</span>
+        <h4>Wholesale enquiry received!</h4>
+        <p>Our sales team will reach out within 1 business day with pricing, availability, and a sample box offer.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===== EQUIPMENT SALE AGREEMENT ===== -->
+<div class="modal-overlay" id="modal-esa">
+  <div class="modal pros-modal" style="max-width:700px;">
+    <button class="modal-close" onclick="closeM('esa')">&#x2715;</button>
+    <h3>Equipment Sale Agreement</h3>
+    <div class="modal-sub">MycoSG Pte. Ltd. &middot; FarmBox Unit Purchase &middot; 2025 Edition</div>
+    <div class="pros-doc" style="max-height:65vh;overflow-y:auto;padding-right:.5rem;">
+      <div class="pros-highlight" style="margin-bottom:1.2rem;">
+        <strong style="color:var(--gold);">IMPORTANT:</strong> This is a template for reference only. The binding agreement will be prepared by MycoSG's solicitors after your expression of interest is received. Obtain independent legal advice before signing.
+      </div>
+      <h4>EQUIPMENT SALE AGREEMENT</h4>
+      <p>This Equipment Sale Agreement (<strong>"Agreement"</strong>) is entered into between:</p>
+      <div class="pros-row"><span><strong>Seller</strong></span><span>MycoSG Pte. Ltd. (UEN: 202512345A), incorporated in Singapore</span></div>
+      <div class="pros-row"><span><strong>Purchaser</strong></span><span>As named in the signed schedule attached hereto</span></div>
+      <div class="pros-row"><span><strong>Date</strong></span><span>As per the signed schedule</span></div>
+
+      <h4>1. Definitions</h4>
+      <p><strong>"FarmBox Unit"</strong> means one 40-foot modified shipping container, fully fitted and commissioned for controlled-environment mushroom cultivation, as described in Schedule 1.</p>
+      <p><strong>"Purchase Price"</strong> means S$58,000 per FarmBox Unit, inclusive of GST where applicable.</p>
+      <p><strong>"Title"</strong> means full legal and beneficial ownership of the FarmBox Unit.</p>
+      <p><strong>"Delivery Date"</strong> means the date on which the Seller provides written notice that the FarmBox Unit is commissioned and ready for operation.</p>
+
+      <h4>2. Sale and Purchase</h4>
+      <p>2.1 The Seller agrees to sell and the Purchaser agrees to purchase the FarmBox Unit(s) specified in the signed schedule at the Purchase Price, subject to the terms of this Agreement.</p>
+      <p>2.2 The Purchaser shall pay the full Purchase Price by bank transfer, PayNow, or such other method as agreed in writing, prior to or on the date of execution.</p>
+      <p>2.3 Title to the FarmBox Unit shall transfer to the Purchaser upon receipt of the full Purchase Price by the Seller.</p>
+      <p>2.4 Risk of loss or damage passes to the Purchaser upon Title transfer, save that MycoSG shall maintain commercial insurance over the unit as part of its farm management obligations under the FMSA.</p>
+
+      <h4>3. Description of FarmBox Unit (Schedule 1)</h4>
+      <div class="pros-row"><span>40ft shipping container (used, ISO certified)</span><span>1 unit</span></div>
+      <div class="pros-row"><span>Insulation and tropical climate modification</span><span>Included</span></div>
+      <div class="pros-row"><span>Commercial-grade HVAC system</span><span>Included</span></div>
+      <div class="pros-row"><span>LED full-spectrum grow lighting</span><span>Included</span></div>
+      <div class="pros-row"><span>IoT environmental sensors (temp, humidity, CO2)</span><span>Included</span></div>
+      <div class="pros-row"><span>Shelving and growing infrastructure</span><span>Included</span></div>
+      <div class="pros-row"><span>Substrate sterilisation and inoculation equipment</span><span>Included</span></div>
+      <div class="pros-row"><span>Electrical works and NEA compliance certification</span><span>Included</span></div>
+      <div class="pros-row"><span>SFA farm licence (initial application)</span><span>Included</span></div>
+      <div class="pros-total"><span>Total Purchase Price per Unit</span><span>S$58,000</span></div>
+
+      <h4>4. Delivery and Commissioning</h4>
+      <p>4.1 The FarmBox Unit shall be delivered to MycoSG's designated farm site in Singapore. The Purchaser acknowledges that physical possession of the unit shall remain at MycoSG's premises for operational purposes under the FMSA.</p>
+      <p>4.2 MycoSG shall commission the FarmBox Unit within 30 days of receiving full payment and shall provide written confirmation of commissioning.</p>
+      <p>4.3 The Purchaser shall be entitled to inspect the FarmBox Unit prior to commissioning upon giving 48 hours written notice to MycoSG.</p>
+
+      <h4>5. Warranties</h4>
+      <p>5.1 The Seller warrants that it has full right and authority to sell the FarmBox Unit and that the unit will be free from any undisclosed encumbrances at the time of Title transfer.</p>
+      <p>5.2 The Seller warrants that the FarmBox Unit will be commissioned in proper working order and will comply with applicable Singapore regulatory standards at the date of commissioning.</p>
+      <p>5.3 Save as expressly set out herein, the FarmBox Unit is sold on an "as is" basis. The Seller makes no warranty as to fitness for any particular purpose beyond mushroom cultivation.</p>
+
+      <h4>6. Right of First Refusal</h4>
+      <p>6.1 Should the Purchaser wish to sell, transfer, or otherwise dispose of the FarmBox Unit, the Purchaser shall first offer MycoSG the right to repurchase the unit at fair market value.</p>
+      <p>6.2 MycoSG shall have 30 days from receipt of written notice to exercise this right. If MycoSG does not exercise this right within 30 days, the Purchaser may sell the unit to any third party, provided such party enters into a new Farm Management Services Agreement with MycoSG.</p>
+
+      <h4>7. Asset and Tax</h4>
+      <p>7.1 The FarmBox Unit is a capital asset and may be depreciated on the Purchaser's balance sheet over its useful life of 8-10 years, subject to the Purchaser's own tax and accounting advice. MycoSG does not provide tax advice.</p>
+
+      <h4>8. Governing Law</h4>
+      <p>This Agreement is governed by the laws of the Republic of Singapore. Any dispute shall be submitted to the exclusive jurisdiction of the Singapore courts, with the parties first attempting mediation at the Singapore Mediation Centre.</p>
+
+      <div class="pros-legal">This is a template document. The final binding agreement will be prepared by Singapore-qualified solicitors and signed by both parties. MycoSG recommends you engage independent legal counsel before executing. &copy; 2025 MycoSG Pte. Ltd. All rights reserved.</div>
+    </div>
+    <div class="cm-cta-row" style="margin-top:1rem;">
+      <button class="btn-primary" onclick="closeM('esa');openM('own')">Proceed to Expression of Interest &rarr;</button>
+      <button class="btn-outline" onclick="closeM('esa');openM('fmsa')">Read FMSA Next &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== FARM MANAGEMENT SERVICES AGREEMENT ===== -->
+<div class="modal-overlay" id="modal-fmsa">
+  <div class="modal pros-modal" style="max-width:700px;">
+    <button class="modal-close" onclick="closeM('fmsa')">&#x2715;</button>
+    <h3>Farm Management Services Agreement</h3>
+    <div class="modal-sub">MycoSG Pte. Ltd. &middot; Operations &amp; Output Fee Structure &middot; 2025</div>
+    <div class="pros-doc" style="max-height:65vh;overflow-y:auto;padding-right:.5rem;">
+      <div class="pros-highlight" style="margin-bottom:1.2rem;">
+        <strong style="color:var(--gold);">IMPORTANT:</strong> This is a template for reference only. The binding FMSA will be prepared by MycoSG's solicitors. Obtain independent legal advice before signing.
+      </div>
+      <h4>FARM MANAGEMENT SERVICES AGREEMENT</h4>
+      <p>This Farm Management Services Agreement (<strong>"Agreement"</strong>) is entered into between:</p>
+      <div class="pros-row"><span><strong>Service Provider</strong></span><span>MycoSG Pte. Ltd. (UEN: 202512345A)</span></div>
+      <div class="pros-row"><span><strong>Unit Owner</strong></span><span>As named in the signed schedule</span></div>
+      <div class="pros-row"><span><strong>FarmBox Unit(s)</strong></span><span>As described in Schedule 1</span></div>
+
+      <h4>1. Appointment</h4>
+      <p>1.1 The Unit Owner hereby appoints MycoSG as the exclusive farm manager for the FarmBox Unit(s) on the terms set out in this Agreement.</p>
+      <p>1.2 MycoSG accepts the appointment and agrees to manage the FarmBox Unit(s) with reasonable care and skill in accordance with its standard cultivation protocols.</p>
+
+      <h4>2. MycoSG's Obligations — All at MycoSG's Cost</h4>
+      <div class="pros-row"><span>Substrate sourcing and preparation</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Spawn and inoculation materials</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Cultivation management (temperature, humidity, CO2)</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Harvesting, post-harvest handling and QC</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Sales to wholesale, retail and subscription channels</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Cold chain distribution and logistics</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Routine HVAC and equipment maintenance</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Electricity, water, and utilities</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Labour and staffing</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>SFA licence renewal and regulatory compliance</span><span style="color:var(--spore);">MycoSG bears</span></div>
+      <div class="pros-row"><span>Commercial and public liability insurance</span><span style="color:var(--spore);">MycoSG bears</span></div>
+
+      <h4>3. Revenue Sharing &mdash; Output Fee Structure</h4>
+      <p>3.1 <strong>Net Production Revenue</strong> means all revenue received from the sale of mushrooms harvested from the Unit Owner's FarmBox Unit(s) in any calendar month, less direct sales returns and applicable GST. Operating costs are borne by MycoSG and are not deducted from revenue in computing the Owner's fee.</p>
+      <p>3.2 <strong>Output Service Fee</strong> to the Unit Owner = <strong style="color:var(--gold);">70% of Net Production Revenue</strong> per month per FarmBox Unit.</p>
+      <p>3.3 <strong>MycoSG Management Fee</strong> = <strong>30% of Net Production Revenue</strong> per month, from which MycoSG bears all operating expenses.</p>
+      <p>3.4 The Output Service Fee shall be paid to the Unit Owner within <strong>15 calendar days</strong> of the end of each calendar month, accompanied by a monthly production and revenue statement.</p>
+
+      <h4>4. Monthly Reporting (Required)</h4>
+      <div class="pros-row"><span>Total harvest weight by variety (kg)</span><span>Monthly</span></div>
+      <div class="pros-row"><span>Gross sales revenue by channel</span><span>Monthly</span></div>
+      <div class="pros-row"><span>Net Production Revenue calculation</span><span>Monthly</span></div>
+      <div class="pros-row"><span>Output Service Fee payable and payment reference</span><span>Monthly</span></div>
+      <div class="pros-row"><span>IoT performance data summary</span><span>Monthly</span></div>
+      <div class="pros-row"><span>Next month production forecast</span><span>Monthly</span></div>
+
+      <h4>5. Term and Termination</h4>
+      <p>5.1 This Agreement shall commence on the Commissioning Date and continue for an initial term of <strong>3 years</strong>, automatically renewing for successive 1-year terms unless terminated.</p>
+      <p>5.2 Either party may terminate at the end of the initial term or any renewal term by providing <strong>90 days written notice</strong>.</p>
+      <p>5.3 Upon termination, the Unit Owner may remove the FarmBox Unit from the farm site within 60 days at the Unit Owner's cost, subject to all outstanding fees being settled.</p>
+
+      <h4>6. Unit Owner's Rights</h4>
+      <p>6.1 The Unit Owner retains full ownership of the FarmBox Unit at all times and may inspect it upon 48 hours written notice.</p>
+      <p>6.2 The Unit Owner may sell or transfer the FarmBox Unit subject to the Right of First Refusal in the Equipment Sale Agreement and provided the new owner enters into a new FMSA.</p>
+      <p>6.3 The Unit Owner shall have access to the MycoSG Owner Dashboard for real-time IoT data and monthly performance reports.</p>
+
+      <h4>7. Limitation of Liability</h4>
+      <p>7.1 MycoSG's liability shall not exceed the total Output Service Fees paid in the 12 months preceding the claim.</p>
+      <p>7.2 MycoSG shall not be liable for production losses arising from force majeure events, including acts of God, government regulatory action, pandemic, or utility failures outside MycoSG's control.</p>
+      <p>7.3 MycoSG does not guarantee any minimum yield, revenue, or output fee. All financial projections in the Information Memorandum are estimates only.</p>
+
+      <h4>8. Governing Law</h4>
+      <p>This Agreement is governed by the laws of the Republic of Singapore. Disputes shall be referred to Singapore International Arbitration Centre (SIAC) under the SIAC Rules before recourse to litigation.</p>
+
+      <div class="pros-legal">This is a template document. The final binding FMSA will be prepared by Singapore-qualified solicitors. MycoSG recommends independent legal counsel. &copy; 2025 MycoSG Pte. Ltd.</div>
+    </div>
+    <div class="cm-cta-row" style="margin-top:1rem;">
+      <button class="btn-primary" onclick="closeM('fmsa');openM('own')">Proceed to Expression of Interest &rarr;</button>
+      <button class="btn-outline" onclick="closeM('fmsa');openM('rds')">Read Risk Disclosure &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RISK DISCLOSURE STATEMENT ===== -->
+<div class="modal-overlay" id="modal-rds">
+  <div class="modal pros-modal" style="max-width:700px;">
+    <button class="modal-close" onclick="closeM('rds')">&#x2715;</button>
+    <h3>Risk Disclosure Statement</h3>
+    <div class="modal-sub">MycoSG FarmBox Programme &middot; Must be read before proceeding</div>
+    <div class="pros-doc" style="max-height:65vh;overflow-y:auto;padding-right:.5rem;">
+      <div class="pros-highlight" style="border-color:var(--rust);background:rgba(196,107,58,.1);margin-bottom:1.2rem;">
+        <strong style="color:var(--rust);">PLEASE READ CAREFULLY.</strong> This Risk Disclosure Statement forms part of the FarmBox Programme documentation. By proceeding with an expression of interest, you confirm you have read and understood the risks described herein. This does not constitute financial, legal, or tax advice.
+      </div>
+
+      <h4>1. Nature of the Arrangement</h4>
+      <p>The MycoSG FarmBox Programme involves the purchase of physical agricultural equipment and a separate services agreement for farm management. This arrangement is <strong>not a collective investment scheme, fund, or regulated financial product</strong> under the Securities and Futures Act (Cap. 289). Output fees are variable commercial service fees, not investment returns or dividends.</p>
+      <p>This offering is made under the <strong>Small Offers Exemption</strong> pursuant to Section 272A of the Securities and Futures Act, limited to a maximum of 50 persons and S$5 million aggregate consideration within any 12-month period.</p>
+
+      <h4>2. Operational Risks</h4>
+      <div class="pros-row"><span><strong>Contamination Risk</strong></span><span style="color:var(--rust);">High</span></div>
+      <p>Mushroom cultivation is susceptible to bacterial and fungal contamination. A contamination event can destroy an entire batch, resulting in zero output for 2-4 weeks. No output fee is paid during non-production periods. MycoSG's biosecure design mitigates but does not eliminate this risk.</p>
+      <div class="pros-row"><span><strong>Yield Variability Risk</strong></span><span style="color:var(--gold);">Medium</span></div>
+      <p>Actual yields depend on environmental conditions, substrate quality, spawn performance, and operator skill. The three-scenario model represents reasonable estimates, not guarantees. Actual yields may be materially lower.</p>
+      <div class="pros-row"><span><strong>Equipment Failure Risk</strong></span><span style="color:var(--gold);">Medium</span></div>
+      <p>HVAC systems, lighting, and IoT equipment may fail. Extended failure may result in crop loss and suspension of output fees during repair periods. MycoSG bears maintenance costs but cannot guarantee zero downtime.</p>
+      <div class="pros-row"><span><strong>Key Personnel Risk</strong></span><span style="color:var(--gold);">Medium</span></div>
+      <p>MycoSG's operations depend on experienced cultivation staff. Loss of key personnel could temporarily affect production quality and yields.</p>
+
+      <h4>3. Market and Commercial Risks</h4>
+      <div class="pros-row"><span><strong>Pricing Risk</strong></span><span style="color:var(--gold);">Medium</span></div>
+      <p>Wholesale and retail mushroom prices may decline due to competition, market saturation, or import pressure. Output fees are linked to revenue. A 20% fall in mushroom prices would reduce owner fees by approximately 20%.</p>
+      <div class="pros-row"><span><strong>Demand Risk</strong></span><span style="color:var(--spore);">Low&ndash;Medium</span></div>
+      <p>MycoSG sells through multiple channels. Loss of key wholesale accounts or subscription cancellations could reduce revenues and therefore output fees.</p>
+      <div class="pros-row"><span><strong>Regulatory Risk</strong></span><span style="color:var(--spore);">Low</span></div>
+      <p>Changes to SFA licensing, food safety, or NEA compliance standards could affect operations. MycoSG bears all regulatory compliance costs under the FMSA.</p>
+
+      <h4>4. Asset and Liquidity Risks</h4>
+      <div class="pros-row"><span><strong>Asset Depreciation Risk</strong></span><span style="color:var(--gold);">Medium</span></div>
+      <p>The FarmBox Unit is a physical asset that depreciates over time. Resale value may be significantly lower than the purchase price, particularly if the unit requires refurbishment or if there is limited secondary market demand.</p>
+      <div class="pros-row"><span><strong>Liquidity Risk</strong></span><span style="color:var(--rust);">High</span></div>
+      <p>There is no established secondary market for FarmBox Units. Exit is dependent on MycoSG exercising its Right of First Refusal or finding a third-party buyer. You may be unable to realise the full purchase price upon sale.</p>
+      <div class="pros-row"><span><strong>Counterparty Risk</strong></span><span style="color:var(--gold);">Medium</span></div>
+      <p>If MycoSG ceases operations or becomes insolvent, output fees will cease. The FarmBox Unit remains the Purchaser's property but may have limited utility without MycoSG's management infrastructure.</p>
+
+      <h4>5. Regulatory Disclosure</h4>
+      <p>This offering is made solely under the Small Offers Exemption (Section 272A SFA). This is <strong>not a prospectus</strong> and has not been registered with or approved by the Monetary Authority of Singapore (MAS). MAS takes no responsibility for the contents of this document.</p>
+
+      <h4>6. Suitability</h4>
+      <div class="pros-row"><span>Can afford to lose the full S$58,000 purchase price</span><span>Required</span></div>
+      <div class="pros-row"><span>Does not require liquidity from this arrangement</span><span>Required</span></div>
+      <div class="pros-row"><span>Has taken independent legal and financial advice</span><span>Strongly recommended</span></div>
+      <div class="pros-row"><span>Understands this is not a guaranteed return product</span><span>Required</span></div>
+
+      <div class="pros-legal" style="border-color:var(--rust);color:rgba(245,240,232,.5);">By proceeding with an Expression of Interest, you acknowledge that you have read this Risk Disclosure Statement in full and understand that output fees are not guaranteed, the FarmBox Unit may depreciate in value, and there is limited liquidity for this asset. &copy; 2025 MycoSG Pte. Ltd. All rights reserved.</div>
+    </div>
+    <div class="cm-cta-row" style="margin-top:1rem;">
+      <button class="btn-primary" onclick="closeM('rds');openM('own')">I Understand &mdash; Proceed to Expression of Interest &rarr;</button>
+      <button class="btn-outline" onclick="closeM('rds');openM('esa')">Review ESA</button>
+      <button class="btn-outline" onclick="closeM('rds');openM('fmsa')">Review FMSA</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
